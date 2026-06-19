@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Worker</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- A 2nd host on the same layers (references ONLY Business).
+         Not part of the reference's 3 layers — added because this domain
+         needs async notifications (Epic 4). -->
+    <ProjectReference Include="..\BusinessLogicLayer2\BusinessLogicLayer2.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DotNetEnv" Version="3.1.1" />
+  </ItemGroup>
+
+</Project>
