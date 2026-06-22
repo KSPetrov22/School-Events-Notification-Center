@@ -1,0 +1,39 @@
+@page
+@model PresentationLayer1.Pages.Events.IndexModel
+@{
+    ViewData["Title"] = "Events";
+}
+
+<section class="page-heading">
+  <div>
+    <h1>Events</h1>
+    <p class="muted">Browse published school events and register while seats are available.</p>
+  </div>
+</section>
+
+<div class="grid">
+@foreach (var item in Model.Events)
+{
+  <article class="card">
+    <div class="card-head">
+      <h2>@item.Title</h2>
+      <span class="badge @item.Status.ToLowerInvariant()">@item.Status</span>
+    </div>
+    <p>@item.Description</p>
+    <dl class="meta">
+      <div><dt>Starts</dt><dd>@item.StartsAt</dd></div>
+      <div><dt>Where</dt><dd>@(item.Location ?? "TBA")</dd></div>
+      <div><dt>Seats</dt><dd>@item.ConfirmedCount / @item.Capacity</dd></div>
+      <div><dt>Waitlist</dt><dd>@item.WaitlistCount</dd></div>
+    </dl>
+    <div class="actions">
+      <a class="button secondary" asp-page="/Events/Details" asp-route-id="@item.Id">Details</a>
+      @if (item.IsFull)
+      {
+        <span class="muted">Waitlist open</span>
+      }
+    </div>
+  </article>
+}
+</div>
+

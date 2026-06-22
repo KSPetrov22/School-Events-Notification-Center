@@ -1,0 +1,49 @@
+@page
+@model PresentationLayer1.Pages.Organizer.Events.IndexModel
+@{
+    ViewData["Title"] = "Organizer events";
+}
+
+<section class="page-heading">
+  <div>
+    <h1>Organizer events</h1>
+    <p class="muted">Manage drafts, publish events, and review signups.</p>
+  </div>
+  <a class="button" asp-page="/Organizer/Events/Edit">New event</a>
+</section>
+
+<div class="grid">
+@foreach (var item in Model.Events)
+{
+  <article class="card">
+    <div class="card-head">
+      <h2>@item.Title</h2>
+      <span class="badge @item.Status.ToLowerInvariant()">@item.Status</span>
+    </div>
+    <p>@item.Description</p>
+    <dl class="meta">
+      <div><dt>Starts</dt><dd>@item.StartsAt</dd></div>
+      <div><dt>Seats</dt><dd>@item.ConfirmedCount / @item.Capacity</dd></div>
+      <div><dt>Waitlist</dt><dd>@item.WaitlistCount</dd></div>
+    </dl>
+    <div class="actions">
+      <a class="button secondary" asp-page="/Organizer/Events/Edit" asp-route-id="@item.Id">Edit</a>
+      <a class="button secondary" asp-page="/Organizer/Events/Preview" asp-route-id="@item.Id">Preview</a>
+      <a class="button secondary" asp-page="/Organizer/Events/Registrations" asp-route-id="@item.Id">Signups</a>
+      @if (item.Status == "DRAFT")
+      {
+        <form method="post" asp-page-handler="Publish" asp-route-id="@item.Id">
+          <button type="submit">Publish</button>
+        </form>
+      }
+      @if (item.Status != "CANCELLED")
+      {
+        <form method="post" asp-page-handler="Cancel" asp-route-id="@item.Id">
+          <button type="submit" class="danger">Cancel</button>
+        </form>
+      }
+    </div>
+  </article>
+}
+</div>
+

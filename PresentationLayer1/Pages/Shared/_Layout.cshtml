@@ -1,0 +1,45 @@
+@using PresentationLayer1.Services
+@inject IAuthSession Auth
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>@ViewData["Title"] - School Events</title>
+  <link rel="stylesheet" href="~/style.css" asp-append-version="true" />
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" asp-page="/Events/Index">School Events</a>
+    <nav aria-label="Primary">
+      <a asp-page="/Events/Index">Events</a>
+      @if (Auth.IsStudent)
+      {
+        <a asp-page="/Registrations/Me">My signups</a>
+      }
+      @if (Auth.IsOrganizer)
+      {
+        <a asp-page="/Organizer/Events/Index">Organizer</a>
+      }
+      @if (Auth.IsSignedIn)
+      {
+        <span class="nav-user">@Auth.CurrentUser?.DisplayName (@Auth.CurrentUser?.Role.ToLowerInvariant())</span>
+        <a asp-page="/Login" asp-page-handler="Logout">Logout</a>
+      }
+      else
+      {
+        <a asp-page="/Login">Login</a>
+      }
+    </nav>
+  </header>
+
+  <main>
+    @if (TempData["Message"] is string message)
+    {
+      <div class="notice">@message</div>
+    }
+    @RenderBody()
+  </main>
+</body>
+</html>
+

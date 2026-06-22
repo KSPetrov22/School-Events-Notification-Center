@@ -1,5 +1,6 @@
 using BusinessLogicLayer2;
 using DotNetEnv;
+using PresentationLayer1.Services;
 
 // Entry point (= the reference's main/app.py): load config, wire the layers,
 // serve the static UI, expose the API. Skeleton only — features go in per epic.
@@ -15,14 +16,24 @@ var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL")
 // Wire the layers (Presentation -> Business -> Data).
 builder.Services.AddBusinessLayer(databaseUrl);
 builder.Services.AddControllers();
+builder.Services.AddRazorPages();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddSession();
+
+var mockApiBaseUrl = builder.Configuration["MockApiBaseUrl"] ?? "http://localhost:5090";
+builder.Services.AddHttpClient<IMockApiClient, MockApiClient>(client =>
+{
+    client.BaseAddress = new Uri(mockApiBaseUrl);
+});
+builder.Services.AddScoped<IAuthSession, AuthSession>();
 
 var app = builder.Build();
 
-// Serve the static web UI from wwwroot/ (the reference's static/).
-app.UseDefaultFiles();
 app.UseStaticFiles();
+app.UseSession();
 
 app.MapControllers();
+app.MapRazorPages();
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 
 // TODO: JWT auth, CORS, authorization policies (Epic 1).

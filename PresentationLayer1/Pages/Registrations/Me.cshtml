@@ -1,0 +1,44 @@
+@page
+@model PresentationLayer1.Pages.Registrations.MeModel
+@{
+    ViewData["Title"] = "My signups";
+}
+
+<section class="page-heading">
+  <div>
+    <h1>My signups</h1>
+    <p class="muted">Your current registrations and waitlist positions.</p>
+  </div>
+</section>
+
+<section class="panel">
+  <table>
+    <thead>
+      <tr>
+        <th>Event</th>
+        <th>Status</th>
+        <th>Waitlist</th>
+        <th>Registered</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+    @foreach (var registration in Model.Registrations)
+    {
+      <tr>
+        <td>@registration.EventTitle</td>
+        <td><span class="badge">@registration.Status</span></td>
+        <td>@(registration.WaitlistPosition?.ToString() ?? "-")</td>
+        <td>@registration.RegisteredAt</td>
+        <td>
+          <form method="post" asp-page-handler="Cancel">
+            <input type="hidden" name="registrationId" value="@registration.Id" />
+            <button class="danger" type="submit">Cancel</button>
+          </form>
+        </td>
+      </tr>
+    }
+    </tbody>
+  </table>
+</section>
+

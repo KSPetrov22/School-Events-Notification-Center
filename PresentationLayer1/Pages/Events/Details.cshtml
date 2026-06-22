@@ -1,0 +1,53 @@
+@page "{id}"
+@model PresentationLayer1.Pages.Events.DetailsModel
+@{
+    ViewData["Title"] = Model.Event?.Title ?? "Event";
+}
+
+@if (Model.Event is null)
+{
+  <section class="panel"><h1>Event not found</h1></section>
+}
+else
+{
+  <section class="panel">
+    <div class="card-head">
+      <h1>@Model.Event.Title</h1>
+      <span class="badge @Model.Event.Status.ToLowerInvariant()">@Model.Event.Status</span>
+    </div>
+    <p>@Model.Event.Description</p>
+    <dl class="meta">
+      <div><dt>Starts</dt><dd>@Model.Event.StartsAt</dd></div>
+      <div><dt>Ends</dt><dd>@Model.Event.EndsAt</dd></div>
+      <div><dt>Location</dt><dd>@(Model.Event.Location ?? "TBA")</dd></div>
+      <div><dt>Confirmed</dt><dd>@Model.Event.ConfirmedCount / @Model.Event.Capacity</dd></div>
+      <div><dt>Waitlist</dt><dd>@Model.Event.WaitlistCount</dd></div>
+    </dl>
+
+    <div class="actions">
+      @if (!Model.Auth.IsSignedIn)
+      {
+        <a class="button" asp-page="/Login">Login to register</a>
+      }
+      else if (Model.Auth.IsStudent && Model.Event.CurrentUserRegistrationId is null)
+      {
+        <form method="post" asp-page-handler="Register">
+          <button type="submit">@(Model.Event.IsFull ? "Join waitlist" : "Register")</button>
+        </form>
+      }
+      else if (Model.Auth.IsStudent)
+      {
+        <span class="badge">@Model.Event.CurrentUserRegistrationStatus</span>
+        @if (Model.Event.CurrentUserWaitlistPosition is int position)
+        {
+          <span class="muted">Position @position</span>
+        }
+        <form method="post" asp-page-handler="Cancel">
+          <input type="hidden" name="registrationId" value="@Model.Event.CurrentUserRegistrationId" />
+          <button type="submit" class="danger">Cancel registration</button>
+        </form>
+      }
+    </div>
+  </section>
+}
+
