@@ -19,14 +19,13 @@ public sealed class DetailsModel(IMockApiClient api, IAuthSession auth) : PageMo
     {
         await api.RegisterAsync(id, cancellationToken);
         TempData["Message"] = "Registration updated.";
-        return RedirectToPage(new { id });
+        return RedirectToPage("/Events/Details", new { id });
     }
 
     public async Task<IActionResult> OnPostCancelAsync(string id, string registrationId, CancellationToken cancellationToken)
     {
         await api.CancelRegistrationAsync(registrationId, cancellationToken);
         TempData["Message"] = "Registration cancelled.";
-        return RedirectToPage(new { id });
+        return RedirectToPage("/Events/Details", new { id });
     }
 }
-

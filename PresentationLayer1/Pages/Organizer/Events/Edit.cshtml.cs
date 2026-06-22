@@ -11,13 +11,12 @@ public sealed class EditModel(IMockApiClient api) : PageModel
     public string? Id { get; set; }
 
     [BindProperty]
-    public EventUpsertRequest Input { get; set; } = new(
-        string.Empty,
-        string.Empty,
-        DateTime.UtcNow.AddDays(7).ToString("yyyy-MM-ddTHH:mm:ssZ"),
-        DateTime.UtcNow.AddDays(7).AddHours(2).ToString("yyyy-MM-ddTHH:mm:ssZ"),
-        20,
-        string.Empty);
+    public EventUpsertRequest Input { get; set; } = new()
+    {
+        StartsAt = DateTime.UtcNow.AddDays(7).ToString("yyyy-MM-ddTHH:mm:ssZ"),
+        EndsAt = DateTime.UtcNow.AddDays(7).AddHours(2).ToString("yyyy-MM-ddTHH:mm:ssZ"),
+        Capacity = 20
+    };
 
     public async Task<IActionResult> OnGetAsync(CancellationToken cancellationToken)
     {
@@ -32,13 +31,15 @@ public sealed class EditModel(IMockApiClient api) : PageModel
             return NotFound();
         }
 
-        Input = new EventUpsertRequest(
-            existing.Title,
-            existing.Description,
-            existing.StartsAt,
-            existing.EndsAt,
-            existing.Capacity,
-            existing.Location);
+        Input = new EventUpsertRequest
+        {
+            Title = existing.Title,
+            Description = existing.Description,
+            StartsAt = existing.StartsAt,
+            EndsAt = existing.EndsAt,
+            Capacity = existing.Capacity,
+            Location = existing.Location
+        };
 
         return Page();
     }
@@ -64,4 +65,3 @@ public sealed class EditModel(IMockApiClient api) : PageModel
         return RedirectToPage("/Organizer/Events/Index");
     }
 }
-

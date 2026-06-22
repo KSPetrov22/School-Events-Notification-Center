@@ -34,13 +34,24 @@ public sealed record RegistrationSummary(
     string RegisteredAt,
     int? WaitlistPosition);
 
-public sealed record EventUpsertRequest(
-    [Required] string Title,
-    [Required] string Description,
-    [Required] string StartsAt,
-    [Required] string EndsAt,
-    [Range(1, int.MaxValue)] int Capacity,
-    string? Location);
+public sealed class EventUpsertRequest
+{
+    [Required]
+    public string Title { get; set; } = string.Empty;
+
+    [Required]
+    public string Description { get; set; } = string.Empty;
+
+    [Required]
+    public string StartsAt { get; set; } = string.Empty;
+
+    [Required]
+    public string EndsAt { get; set; } = string.Empty;
+
+    [Range(1, int.MaxValue)]
+    public int Capacity { get; set; } = 1;
+
+    public string? Location { get; set; }
+}
 
 public sealed record LoginRequest([Required] string Email);
-

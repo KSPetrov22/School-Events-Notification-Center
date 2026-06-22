@@ -29,9 +29,32 @@ backend-shaped REST endpoints and persists demo data in SQLite.
 
 ## Implementation State
 
-In progress. The frontend scaffold and mock server files have been added, but
-local verification is blocked by the installed SDK version: this machine has
-.NET 8 while the solution targets `net10.0`.
+Frontend scaffold implementation is complete for the planned first pass. The
+Razor Pages UI, typed mock API client, separate mock server, SQLite-backed mock
+storage, and seeded student/organizer flows have been added.
+
+Local verification is blocked by the installed SDK version: this machine has
+.NET 8 while the solution targets `net10.0`. `dotnet build SchoolEvents.slnx`
+also requires newer tooling that understands `.slnx`.
+
+## Run Notes
+
+With a .NET SDK that supports `net10.0` and `.slnx`:
+
+```powershell
+dotnet run --project MockServer
+dotnet run --project PresentationLayer1
+```
+
+Then open `http://localhost:5080`. The mock server listens on
+`http://localhost:5090`, and `PresentationLayer1` reads that from
+`MockApiBaseUrl`.
+
+Seeded mock accounts:
+
+- `student1@school.local`
+- `student2@school.local`
+- `organizer1@school.local`
 
 ## Known Gaps / Next Decisions
 
@@ -40,4 +63,3 @@ local verification is blocked by the installed SDK version: this machine has
 - Mock auth uses seeded users and mock session values.
 - Mock server is temporary and should mimic backend REST contracts closely
   enough to swap out later.
-

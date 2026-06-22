@@ -18,6 +18,7 @@ builder.Services.AddBusinessLayer(databaseUrl);
 builder.Services.AddControllers();
 builder.Services.AddRazorPages();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession();
 
 var mockApiBaseUrl = builder.Configuration["MockApiBaseUrl"] ?? "http://localhost:5090";

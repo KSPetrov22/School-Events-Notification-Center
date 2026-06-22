@@ -45,7 +45,9 @@ app.MapGet("/events/{id}", IResult (string id, HttpRequest request) =>
 app.MapPost("/events", IResult (EventUpsertRequest input, HttpRequest request) =>
 {
     var user = database.RequireRole(request, "ORGANIZER");
-    return user is null ? Results.Forbid() : Results.Ok(database.CreateEvent(user.Id, input));
+    return user is null
+        ? Results.StatusCode(StatusCodes.Status403Forbidden)
+        : Results.Ok(database.CreateEvent(user.Id, input));
 });
 
 app.MapPut("/events/{id}", IResult (string id, EventUpsertRequest input, HttpRequest request) =>
@@ -53,7 +55,7 @@ app.MapPut("/events/{id}", IResult (string id, EventUpsertRequest input, HttpReq
     var user = database.RequireRole(request, "ORGANIZER");
     if (user is null)
     {
-        return Results.Forbid();
+        return Results.StatusCode(StatusCodes.Status403Forbidden);
     }
 
     var updated = database.UpdateEvent(id, user.Id, input);
@@ -65,7 +67,7 @@ app.MapPost("/events/{id}/publish", IResult (string id, HttpRequest request) =>
     var user = database.RequireRole(request, "ORGANIZER");
     if (user is null)
     {
-        return Results.Forbid();
+        return Results.StatusCode(StatusCodes.Status403Forbidden);
     }
 
     var updated = database.SetEventStatus(id, user.Id, "PUBLISHED");
@@ -77,7 +79,7 @@ app.MapPost("/events/{id}/cancel", IResult (string id, HttpRequest request) =>
     var user = database.RequireRole(request, "ORGANIZER");
     if (user is null)
     {
-        return Results.Forbid();
+        return Results.StatusCode(StatusCodes.Status403Forbidden);
     }
 
     var updated = database.SetEventStatus(id, user.Id, "CANCELLED");
@@ -89,7 +91,7 @@ app.MapPost("/events/{id}/registrations", IResult (string id, HttpRequest reques
     var user = database.RequireRole(request, "STUDENT");
     if (user is null)
     {
-        return Results.Forbid();
+        return Results.StatusCode(StatusCodes.Status403Forbidden);
     }
 
     var registration = database.Register(id, user.Id);
@@ -103,7 +105,7 @@ app.MapDelete("/registrations/{id}", IResult (string id, HttpRequest request) =>
     var user = database.RequireRole(request, "STUDENT");
     if (user is null)
     {
-        return Results.Forbid();
+        return Results.StatusCode(StatusCodes.Status403Forbidden);
     }
 
     return database.CancelRegistration(id, user.Id) ? Results.NoContent() : Results.NotFound();
@@ -112,14 +114,16 @@ app.MapDelete("/registrations/{id}", IResult (string id, HttpRequest request) =>
 app.MapGet("/registrations/me", IResult (HttpRequest request) =>
 {
     var user = database.RequireRole(request, "STUDENT");
-    return user is null ? Results.Forbid() : Results.Ok(database.GetRegistrationsForUser(user.Id));
+    return user is null
+        ? Results.StatusCode(StatusCodes.Status403Forbidden)
+        : Results.Ok(database.GetRegistrationsForUser(user.Id));
 });
 
 app.MapGet("/events/{id}/registrations", IResult (string id, HttpRequest request) =>
 {
     var user = database.RequireRole(request, "ORGANIZER");
     return user is null
-        ? Results.Forbid()
+        ? Results.StatusCode(StatusCodes.Status403Forbidden)
         : Results.Ok(database.GetRegistrationsForEvent(id, user.Id, "CONFIRMED"));
 });
 
@@ -127,7 +131,7 @@ app.MapGet("/events/{id}/waitlist", IResult (string id, HttpRequest request) =>
 {
     var user = database.RequireRole(request, "ORGANIZER");
     return user is null
-        ? Results.Forbid()
+        ? Results.StatusCode(StatusCodes.Status403Forbidden)
         : Results.Ok(database.GetRegistrationsForEvent(id, user.Id, "WAITLISTED"));
 });
 
@@ -683,7 +687,15 @@ sealed class MockDatabase
 sealed record MockUser(string Id, string Email, string Role, string DisplayName);
 sealed record LoginRequest(string Email);
 sealed record LoginResponse(string Token, MockUser User);
-sealed record EventUpsertRequest(string Title, string Description, string StartsAt, string EndsAt, int Capacity, string? Location);
+sealed class EventUpsertRequest
+{
+    public string Title { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public string StartsAt { get; set; } = string.Empty;
+    public string EndsAt { get; set; } = string.Empty;
+    public int Capacity { get; set; }
+    public string? Location { get; set; }
+}
 sealed record EventSummary(
     string Id,
     string OrganizerId,
