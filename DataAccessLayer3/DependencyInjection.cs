@@ -9,7 +9,9 @@ public static class DependencyInjection
     public static IServiceCollection AddDataLayer(
         this IServiceCollection services, string databaseUrl)
     {
-        // TODO: register AppDbContext (UseNpgsql) + repositories here.
+        // TODO: register AppDbContext + repositories here.
+        // SQLite (local): options.UseSqlite(databaseUrl).UseSnakeCaseNamingConvention();
+        // PostgreSQL (prod): options.UseNpgsql(databaseUrl).UseSnakeCaseNamingConvention();
         return services;
     }
 }

@@ -8,12 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- EF Core + PostgreSQL provider. Design package enables `dotnet ef`. -->
+    <!-- EF Core + SQLite (local). Swap to Npgsql when hosting on PostgreSQL. -->
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.0" />
+    <!-- <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" /> -->
     <!-- Maps PascalCase entities -> snake_case columns (starts_at, ...) -->
     <PackageReference Include="EFCore.NamingConventions" Version="9.0.0" />
   </ItemGroup>
