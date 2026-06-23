@@ -38,8 +38,13 @@
     {
       <div class="notice">@message</div>
     }
+    @if (TempData["Error"] is string error)
+    {
+      <div class="notice error">@error</div>
+    }
     @RenderBody()
   </main>
+  <script src="~/app.js" asp-append-version="true"></script>
 </body>
 </html>
 

@@ -21,7 +21,7 @@
     </div>
     <p>@item.Description</p>
     <dl class="meta">
-      <div><dt>Starts</dt><dd>@item.StartsAt</dd></div>
+      <div><dt>Starts</dt><dd><time class="local-time" datetime="@item.StartsAt">@item.StartsAt</time></dd></div>
       <div><dt>Where</dt><dd>@(item.Location ?? "TBA")</dd></div>
       <div><dt>Seats</dt><dd>@item.ConfirmedCount / @item.Capacity</dd></div>
       <div><dt>Waitlist</dt><dd>@item.WaitlistCount</dd></div>

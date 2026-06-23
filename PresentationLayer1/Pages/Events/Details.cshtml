@@ -17,14 +17,15 @@ else
     </div>
     <p>@Model.Event.Description</p>
     <dl class="meta">
-      <div><dt>Starts</dt><dd>@Model.Event.StartsAt</dd></div>
-      <div><dt>Ends</dt><dd>@Model.Event.EndsAt</dd></div>
+      <div><dt>Starts</dt><dd><time class="local-time" datetime="@Model.Event.StartsAt">@Model.Event.StartsAt</time></dd></div>
+      <div><dt>Ends</dt><dd><time class="local-time" datetime="@Model.Event.EndsAt">@Model.Event.EndsAt</time></dd></div>
       <div><dt>Location</dt><dd>@(Model.Event.Location ?? "TBA")</dd></div>
       <div><dt>Confirmed</dt><dd>@Model.Event.ConfirmedCount / @Model.Event.Capacity</dd></div>
       <div><dt>Waitlist</dt><dd>@Model.Event.WaitlistCount</dd></div>
     </dl>
 
     <div class="actions">
+      <button class="button secondary js-copy-link">Copy link</button>
       @if (!Model.Auth.IsSignedIn)
       {
         <a class="button" asp-page="/Login">Login to register</a>

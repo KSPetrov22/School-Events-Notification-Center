@@ -5,18 +5,30 @@
 }
 
 <section class="panel narrow">
-  <h1>Mock login</h1>
-  <p class="muted">Choose one seeded account while the real authentication backend is being built.</p>
-  <form method="post" class="stack">
-    <label>
-      Account
-      <select asp-for="Email">
-        <option value="student1@school.local">Student: student1@school.local</option>
-        <option value="student2@school.local">Student: student2@school.local</option>
-        <option value="organizer1@school.local">Organizer: organizer1@school.local</option>
-      </select>
-    </label>
-    <button type="submit">Login</button>
-  </form>
+  @if (Model.IsMockLogin)
+  {
+    <h1>Mock login</h1>
+    <p class="muted">Choose one seeded account while the real authentication backend is being built.</p>
+    <form method="post" class="stack">
+      <label>
+        Account
+        <select asp-for="Email">
+          <option value="student1@school.local">Student: student1@school.local</option>
+          <option value="student2@school.local">Student: student2@school.local</option>
+          <option value="organizer1@school.local">Organizer: organizer1@school.local</option>
+        </select>
+      </label>
+      <button type="submit">Login</button>
+    </form>
+  }
+  else
+  {
+    <h1>Login</h1>
+    <form method="post" class="stack">
+      <label>Email<input asp-for="Email" type="email" required /></label>
+      <label>Password<input asp-for="Password" type="password" required /></label>
+      <span asp-validation-summary="All" class="muted"></span>
+      <button type="submit">Login</button>
+    </form>
+  }
 </section>
-

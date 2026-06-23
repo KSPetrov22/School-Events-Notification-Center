@@ -4,13 +4,20 @@ using PresentationLayer1.Services;
 
 namespace PresentationLayer1.Pages;
 
-public sealed class LoginModel(IMockApiClient api, IAuthSession auth) : PageModel
+public sealed class LoginModel(IMockApiClient api, IAuthSession auth, IConfiguration config) : PageModel
 {
     [BindProperty]
     public string Email { get; set; } = "student1@school.local";
 
+    // Collected in real-login mode. Ignored by the mock API; wire to real auth when backend is ready.
+    [BindProperty]
+    public string Password { get; set; } = string.Empty;
+
+    public bool IsMockLogin { get; private set; }
+
     public void OnGet()
     {
+        IsMockLogin = config.GetValue<bool>("MOCK_LOGIN", true);
     }
 
     public IActionResult OnGetLogout()
@@ -22,10 +29,12 @@ public sealed class LoginModel(IMockApiClient api, IAuthSession auth) : PageMode
 
     public async Task<IActionResult> OnPostAsync(CancellationToken cancellationToken)
     {
+        IsMockLogin = config.GetValue<bool>("MOCK_LOGIN", true);
+
         var login = await api.LoginAsync(Email, cancellationToken);
         if (login is null)
         {
-            ModelState.AddModelError(string.Empty, "Mock user was not found.");
+            ModelState.AddModelError(string.Empty, IsMockLogin ? "Mock user not found." : "Invalid email or password.");
             return Page();
         }
 
@@ -36,4 +45,3 @@ public sealed class LoginModel(IMockApiClient api, IAuthSession auth) : PageMode
             : RedirectToPage("/Events/Index");
     }
 }
-

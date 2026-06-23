@@ -28,7 +28,8 @@ public sealed class EditModel(IMockApiClient api) : PageModel
         var existing = await api.GetEventAsync(Id, cancellationToken);
         if (existing is null)
         {
-            return NotFound();
+            TempData["Error"] = "Event not found or cannot be edited.";
+            return RedirectToPage("Index");
         }
 
         Input = new EventUpsertRequest
