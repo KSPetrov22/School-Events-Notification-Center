@@ -6,12 +6,12 @@ using PresentationLayer1.Services;
 // serve the static UI, expose the API. Skeleton only — features go in per epic.
 
 // Load .env (see .env.example) into environment variables for local dev.
-Env.TraverseUp().Load();
+Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
-var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL")
-    ?? throw new InvalidOperationException("Missing required env var: DATABASE_URL");
+var databaseUrl = builder.Configuration["DATABASE_URL"]
+    ?? throw new InvalidOperationException("Missing required config: DATABASE_URL");
 
 // Wire the layers (Presentation -> Business -> Data).
 builder.Services.AddBusinessLayer(databaseUrl);
