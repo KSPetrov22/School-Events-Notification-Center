@@ -3,17 +3,11 @@
 ## Architecture Design
 
 - Frontend target: `PresentationLayer1` using C# Razor Pages.
-- Static assets remain under `PresentationLayer1/wwwroot`.
-- Mock backend target: separate root-level `MockServer` project.
+- Static assets under `PresentationLayer1/wwwroot`.
+- Mock backend target: separate root-level `MockServer` project (port 5090).
 - Mock storage: SQLite file initialized from `DataAccessLayer3/Db/schema.sql`.
-- Razor Pages call the mock server through C# client services.
-- Future backend swap should require configuration/client changes, not UI rewrites.
-
-## Current Plan
-
-Implement a Razor Pages frontend scaffold for student and organizer workflows
-while the real backend is absent. Provide a mock server that exposes
-backend-shaped REST endpoints and persists demo data in SQLite.
+- Razor Pages call the mock server through typed C# client services (`IMockApiClient`).
+- Future backend swap requires only configuration and client changes, not UI rewrites.
 
 ## Plan Progress
 
@@ -21,45 +15,68 @@ backend-shaped REST endpoints and persists demo data in SQLite.
 - [x] Chose Razor Pages for the C# frontend model.
 - [x] Chose a separate mock server instead of browser-only mocks.
 - [x] Chose SQLite storage initialized from `schema.sql`.
-- [x] Create `MockServer` project.
-- [x] Add mock REST endpoints.
-- [x] Add Razor Pages frontend scaffold.
+- [x] Create `MockServer` project with full REST surface.
+- [x] Add mock REST endpoints (events CRUD, publish/cancel, registrations, waitlist, `/registrations/me`).
+- [x] Add Razor Pages frontend scaffold — all student and organizer flows.
 - [x] Wire frontend client services to mock server.
-- [ ] Verify student and organizer flows against a running `net10.0` SDK.
+- [x] Verified student and organizer flows against a running `net10.0` SDK.
 
 ## Implementation State
 
-Frontend scaffold implementation is complete for the planned first pass. The
-Razor Pages UI, typed mock API client, separate mock server, SQLite-backed mock
-storage, and seeded student/organizer flows have been added.
+The frontend and mock stack are fully operational. All Razor Pages for student and organizer
+workflows are wired to the MockServer and verified running on .NET 10.
 
-Local verification is blocked by the installed SDK version: this machine has
-.NET 8 while the solution targets `net10.0`. `dotnet build SchoolEvents.slnx`
-also requires newer tooling that understands `.slnx`.
+**Features implemented beyond the original scaffold:**
+
+- Local-timezone datetime display via `<time class="local-time">` + `Intl` JS API.
+- Copy-link and public-link buttons on published events (organizer cards and student detail view).
+- Location display in event cards and detail pages.
+- FULL capacity pill on organizer event cards when an event is at capacity.
+- Graceful handling of editing a cancelled event: redirects to index with a flash message
+  instead of returning a raw 404.
+- TempData error/message flash notifications in `_Layout.cshtml`.
+- `wwwroot/app.js` for all browser-side enhancements (time conversion, clipboard).
+
+**MOCK_LOGIN toggle:**
+
+`MOCK_LOGIN=false` (default everywhere) shows the real email + password login form.
+Set `MOCK_LOGIN=true` via `.env.mockdev.example` to activate the mock dropdown of seeded accounts.
+
+## Env File Structure
+
+| File | Purpose |
+|---|---|
+| `appsettings.Development.json` | Provides `DATABASE_URL` and `MOCK_LOGIN=false` defaults; mock stack needs no `.env` |
+| `.env.mockdev.example` | Copy to `.env` to enable mock login dropdown (`MOCK_LOGIN=true`) |
+| `.env.dev.example` | Copy to `.env` for real backend local dev (SQLite, MailHog, dev JWT secret) |
 
 ## Run Notes
 
-With a .NET SDK that supports `net10.0` and `.slnx`:
+### Mock stack (working today)
 
-```powershell
-dotnet run --project MockServer
-dotnet run --project PresentationLayer1
+```bash
+cp .env.mockdev.example .env
+dotnet run --project MockServer           # → http://localhost:5090
+dotnet run --project PresentationLayer1   # → http://localhost:5080
 ```
 
-Then open `http://localhost:5080`. The mock server listens on
-`http://localhost:5090`, and `PresentationLayer1` reads that from
-`MockApiBaseUrl`.
+Seeded mock accounts (no password):
 
-Seeded mock accounts:
+- `student1@school.local` / `student2@school.local` — Student
+- `organizer1@school.local` / `organizer2@school.local` — Organizer
 
-- `student1@school.local`
-- `student2@school.local`
-- `organizer1@school.local`
+### Real backend (TODO — layers not yet implemented)
 
-## Known Gaps / Next Decisions
+```bash
+cp .env.dev.example .env
+dotnet run --project DataAccessLayer3/Db/InitDb/InitDb.csproj
+dotnet run --project PresentationLayer1   # → http://localhost:5080
+dotnet run --project Worker
+```
 
-- Local machine currently has .NET 8 SDK, while projects target `net10.0`.
-- Do not retarget projects unless explicitly requested.
-- Mock auth uses seeded users and mock session values.
-- Mock server is temporary and should mimic backend REST contracts closely
-  enough to swap out later.
+## Known Gaps / Next Steps
+
+- `BusinessLogicLayer2/Services/` and `DataAccessLayer3/Models/` are still empty (`TODO`).
+- `Worker/NotificationWorker.cs` is a poll-loop skeleton only.
+- Mock auth uses `X-Mock-User-Id` header; real JWT auth wiring is not done.
+- MockServer is temporary — the real REST surface should mirror its contract.

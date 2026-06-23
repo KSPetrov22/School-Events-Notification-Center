@@ -17,7 +17,7 @@ public sealed class LoginModel(IMockApiClient api, IAuthSession auth, IConfigura
 
     public void OnGet()
     {
-        IsMockLogin = config.GetValue<bool>("MOCK_LOGIN", true);
+        IsMockLogin = config.GetValue<bool>("MOCK_LOGIN", false);
     }
 
     public IActionResult OnGetLogout()
@@ -29,7 +29,7 @@ public sealed class LoginModel(IMockApiClient api, IAuthSession auth, IConfigura
 
     public async Task<IActionResult> OnPostAsync(CancellationToken cancellationToken)
     {
-        IsMockLogin = config.GetValue<bool>("MOCK_LOGIN", true);
+        IsMockLogin = config.GetValue<bool>("MOCK_LOGIN", false);
 
         var login = await api.LoginAsync(Email, cancellationToken);
         if (login is null)

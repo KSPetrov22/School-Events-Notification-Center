@@ -2,17 +2,18 @@
 
 ## Current State
 
-School Events Notification Center is a C#/.NET solution scaffold for a school
-events app. The repository is mostly structure: layers, project references,
-static UI shell, database DDL, and worker skeleton are present, while feature
-implementation is still TODO.
+School Events Notification Center is a C#/.NET solution. The Razor Pages frontend
+and MockServer are fully operational. The business and data layers and the Worker
+remain TODO structure.
 
-The solution file is `SchoolEvents.slnx` and includes four projects:
+The solution file is `SchoolEvents.slnx` and includes four projects (plus a temporary fifth):
 
-- `PresentationLayer1` - ASP.NET Core host serving static UI and API endpoints.
-- `BusinessLogicLayer2` - service/rules layer and dependency wiring into Data.
-- `DataAccessLayer3` - EF Core/data layer and SQLite schema assets.
-- `Worker` - background worker host for notification processing.
+- `PresentationLayer1` - ASP.NET Core Razor Pages frontend (port 5080).
+- `BusinessLogicLayer2` - service/rules layer and dependency wiring into Data (TODO).
+- `DataAccessLayer3` - EF Core/data layer and SQLite schema assets (TODO).
+- `Worker` - background worker host for notification processing (skeleton only).
+- `MockServer` - temporary minimal API mock backend (port 5090); implements the full REST
+  surface backed by SQLite seeded from `schema.sql`. Remove once real backend is implemented.
 
 ## Architecture Rules
 
@@ -29,15 +30,16 @@ Hosts should call `AddBusinessLayer(databaseUrl)`. The Business layer calls
 
 ## Runtime Configuration
 
-Both hosts load `.env` with DotNetEnv and require `DATABASE_URL`.
+Both hosts load `.env` with DotNetEnv when present; `appsettings.Development.json` provides
+fallback defaults for the mock stack so no `.env` is required to run it.
 
-Local database notes in `DataAccessLayer3/Db/README.md` describe SQLite usage:
+| File | Use |
+|---|---|
+| `appsettings.Development.json` | `DATABASE_URL` (SQLite) and `MOCK_LOGIN=false`; mock stack needs no extra setup |
+| `.env.mockdev.example` | Copy to `.env` to enable mock login dropdown (`MOCK_LOGIN=true`) |
+| `.env.dev.example` | Copy to `.env` for real backend local dev (SQLite, MailHog, dev JWT secret) |
 
-```text
-DATABASE_URL=Data Source=DataAccessLayer3/Db/school_events.db
-```
-
-The worker also reads `WORKER_POLL_SECONDS`; it defaults to 5 seconds.
+The worker also reads `WORKER_POLL_SECONDS` (default 5 s) and `WORKER_MAX_ATTEMPTS` (default 3).
 
 ## Data Model Plan
 
@@ -59,10 +61,12 @@ successful notification log per job.
 ## Packages And Stack
 
 - Target framework: `net10.0`
-- Presentation: ASP.NET Core, controllers, JWT bearer auth package, DotNetEnv
-- Business: BCrypt.Net-Next, MailKit, DI abstractions
-- Data: EF Core 9, EF Core SQLite, EFCore.NamingConventions
-- Worker: .NET Worker Service, DotNetEnv
+- **PresentationLayer1**: ASP.NET Core Razor Pages, session auth, typed HttpClient
+  (`MockApiClient`), JWT bearer auth package, DotNetEnv
+- **MockServer**: ASP.NET Core Minimal API, Microsoft.Data.Sqlite, single-file architecture
+- **BusinessLogicLayer2**: BCrypt.Net-Next, MailKit, DI abstractions
+- **DataAccessLayer3**: EF Core 9, EF Core SQLite, EFCore.NamingConventions
+- **Worker**: .NET Worker Service, DotNetEnv
 
 The README mentions PostgreSQL/Npgsql as a future or production target, but the
 checked-in project currently references SQLite and comments out Npgsql.
@@ -89,13 +93,24 @@ checked-in project currently references SQLite and comments out Npgsql.
   - delays by configured poll interval
   - TODO: claim and process notification jobs
 
-## Static UI
+## Frontend Structure
 
-`PresentationLayer1/wwwroot` contains a minimal shell:
+`PresentationLayer1` is a full Razor Pages frontend:
 
-- `index.html` with nav links for Events, My signups, My badges, and Login.
-- `app.js` currently contains only a skeleton comment.
-- `style.css` provides simple responsive styling.
+```
+Pages/
+  Events/Index.cshtml        student event catalog
+  Events/Details.cshtml      event detail + register/cancel
+  Registrations/Me.cshtml    student's own registrations
+  Organizer/Events/          organizer CRUD, preview, registrations list
+  Login.cshtml               real login form (default) or mock dropdown (MOCK_LOGIN=true)
+Services/
+  IMockApiClient / MockApiClient   typed HttpClient calling MockServer
+  IAuthSession / AuthSession       session-based user identity (id/email/role/name)
+wwwroot/
+  app.js      local-timezone time display, copy-link clipboard buttons
+  style.css   responsive styles
+```
 
 ## Likely Next Implementation Path
 
@@ -108,11 +123,12 @@ checked-in project currently references SQLite and comments out Npgsql.
 7. Add thin controllers under `PresentationLayer1/Controllers`.
 8. Implement notification job claiming/sending in Worker through Business services.
 
-## Notes From Exploration
+## Notes
 
-- Some README/schema text appears mojibake-encoded in the terminal output, but
-  the intent is still readable.
-- `git` was not available in the current shell, so status could not be checked.
-- No existing `.codex` or `.agents` folder was present before this knowledge
-  base was initialized.
+- The `DataAccessLayer3/DataAccessLayer3.csproj` excludes `Db/InitDb/**` via
+  `<Compile Remove>` to prevent the nested InitDb `Program.cs` from conflicting
+  with the parent project's compilation.
+- DotNetEnv 3.x removed `Env.TraverseUp()`; use `Env.Load()` instead.
+- Config is read via `builder.Configuration["KEY"]`, not `Environment.GetEnvironmentVariable`,
+  so `appsettings.*.json` values take effect even without a `.env` file.
 
