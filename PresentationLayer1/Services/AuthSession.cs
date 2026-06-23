@@ -4,7 +4,7 @@ namespace PresentationLayer1.Services;
 
 public interface IAuthSession
 {
-    MockUser? CurrentUser { get; }
+    UserInfo? CurrentUser { get; }
     string? Token { get; }
     bool IsSignedIn { get; }
     bool IsStudent { get; }
@@ -15,15 +15,15 @@ public interface IAuthSession
 
 public sealed class AuthSession(IHttpContextAccessor httpContextAccessor) : IAuthSession
 {
-    private const string UserIdKey = "mock:user:id";
-    private const string UserEmailKey = "mock:user:email";
-    private const string UserRoleKey = "mock:user:role";
-    private const string UserDisplayNameKey = "mock:user:name";
-    private const string TokenKey = "mock:token";
+    private const string UserIdKey = "user:id";
+    private const string UserEmailKey = "user:email";
+    private const string UserRoleKey = "user:role";
+    private const string UserDisplayNameKey = "user:name";
+    private const string TokenKey = "auth:token";
 
     private ISession? Session => httpContextAccessor.HttpContext?.Session;
 
-    public MockUser? CurrentUser
+    public UserInfo? CurrentUser
     {
         get
         {
@@ -38,7 +38,7 @@ public sealed class AuthSession(IHttpContextAccessor httpContextAccessor) : IAut
                 string.IsNullOrWhiteSpace(role) ||
                 string.IsNullOrWhiteSpace(name)
                     ? null
-                    : new MockUser(id, email, role, name);
+                    : new UserInfo(id, email, role, name);
         }
     }
 
@@ -46,6 +46,7 @@ public sealed class AuthSession(IHttpContextAccessor httpContextAccessor) : IAut
     public bool IsSignedIn => CurrentUser is not null;
     public bool IsStudent => string.Equals(CurrentUser?.Role, "STUDENT", StringComparison.OrdinalIgnoreCase);
     public bool IsOrganizer => string.Equals(CurrentUser?.Role, "ORGANIZER", StringComparison.OrdinalIgnoreCase);
+
 
     public void SignIn(LoginResponse login)
     {

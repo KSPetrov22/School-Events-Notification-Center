@@ -35,7 +35,6 @@ DataAccessLayer3/          EF Core (= reference models.py + db.py + repositories
 Worker/                    background host on the same layers (references Business)
   Program.cs  NotificationWorker.cs   poll-loop skeleton (Epic 4)
 SchoolEvents.slnx          the four projects
-.env.example               copy to .env
 ```
 
 (Empty folders are kept in git with a `.gitkeep` placeholder; delete it once you
@@ -48,8 +47,8 @@ PresentationLayer1/
   Program.cs               entry point: config, DI, session, HttpClient for mock API
   Pages/                   Razor Pages UI (Events, Organizer/Events, Registrations, Login)
   Services/
-    IMockApiClient.cs      typed HttpClient interface (replaces with real API client later)
-    MockApiClient.cs       calls MockServer over HTTP
+    IApiClient.cs          typed HttpClient interface — swap base URL to point at real backend
+    ApiClient.cs           calls the backend API over HTTP; sends Authorization: Bearer
     IAuthSession.cs        session abstraction
     AuthSession.cs         stores user id/email/role/name in ASP.NET Core session
   wwwroot/                 static assets (app.js, style.css)
@@ -64,7 +63,8 @@ MockServer/
 ```
 
 Reads `DataAccessLayer3/Db/schema.sql` on first run, seeds 4 users and 3 events.
-Authenticates via `X-Mock-User-Id` header (any seeded email, no password needed).
+Issues `alg:none` JWT tokens at `/login` (password is accepted but ignored).
+Reads user identity from `Authorization: Bearer` on all other requests.
 
 ## Where to start filling it in
 
@@ -83,7 +83,7 @@ Authenticates via `X-Mock-User-Id` header (any seeded email, no password needed)
 - JWT Bearer auth · BCrypt password hashing · MailKit (SMTP) · DotNetEnv
 
 **Frontend (PresentationLayer1)**
-- ASP.NET Core Razor Pages · session-based auth · typed HttpClient (MockApiClient)
+- ASP.NET Core Razor Pages · session-based auth · typed HttpClient (`ApiClient`)
 - DotNetEnv · plain HTML/CSS/JS in `wwwroot/`
 
 **MockServer**
@@ -108,7 +108,7 @@ Open **http://localhost:5080**. The login page shows a dropdown of seeded accoun
 ### Real backend — frontend with actual login screen (requires layers to be implemented)
 
 ```bash
-cp .env.dev.example .env   # for local dev; use .env.prod.example for production
+cp .env.dev.example .env
 # Edit .env as needed (DATABASE_URL, SMTP_*, JWT_SECRET already have dev defaults)
 
 dotnet run --project DataAccessLayer3/Db/InitDb/InitDb.csproj   # create DB from schema.sql

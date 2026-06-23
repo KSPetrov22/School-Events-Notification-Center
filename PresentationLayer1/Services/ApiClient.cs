@@ -3,9 +3,9 @@ using PresentationLayer1.Models;
 
 namespace PresentationLayer1.Services;
 
-public interface IMockApiClient
+public interface IApiClient
 {
-    Task<LoginResponse?> LoginAsync(string email, CancellationToken cancellationToken = default);
+    Task<LoginResponse?> LoginAsync(string email, string password, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<EventSummary>> GetEventsAsync(CancellationToken cancellationToken = default);
     Task<EventSummary?> GetEventAsync(string id, CancellationToken cancellationToken = default);
     Task<EventSummary?> CreateEventAsync(EventUpsertRequest request, CancellationToken cancellationToken = default);
@@ -19,10 +19,10 @@ public interface IMockApiClient
     Task<IReadOnlyList<RegistrationSummary>> GetWaitlistAsync(string eventId, CancellationToken cancellationToken = default);
 }
 
-public sealed class MockApiClient(HttpClient httpClient, IAuthSession authSession) : IMockApiClient
+public sealed class ApiClient(HttpClient httpClient, IAuthSession authSession) : IApiClient
 {
-    public Task<LoginResponse?> LoginAsync(string email, CancellationToken cancellationToken = default) =>
-        PostAsync<LoginRequest, LoginResponse>("login", new LoginRequest(email), cancellationToken);
+    public Task<LoginResponse?> LoginAsync(string email, string password, CancellationToken cancellationToken = default) =>
+        PostAsync<LoginRequest, LoginResponse>("login", new LoginRequest(email, password), cancellationToken);
 
     public Task<IReadOnlyList<EventSummary>> GetEventsAsync(CancellationToken cancellationToken = default) =>
         GetListAsync<EventSummary>("events", cancellationToken);
@@ -101,11 +101,6 @@ public sealed class MockApiClient(HttpClient httpClient, IAuthSession authSessio
     private HttpRequestMessage NewRequest(HttpMethod method, string path)
     {
         var request = new HttpRequestMessage(method, path);
-        if (authSession.CurrentUser is { } user)
-        {
-            request.Headers.Add("X-Mock-User-Id", user.Id);
-        }
-
         if (!string.IsNullOrWhiteSpace(authSession.Token))
         {
             request.Headers.Add("Authorization", $"Bearer {authSession.Token}");
@@ -114,4 +109,3 @@ public sealed class MockApiClient(HttpClient httpClient, IAuthSession authSessio
         return request;
     }
 }
-

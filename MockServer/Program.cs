@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.Json;
 using Microsoft.Data.Sqlite;
 
@@ -23,10 +24,10 @@ app.MapPost("/login", IResult (LoginRequest request) =>
     var user = database.GetUserByEmail(request.Email);
     if (user is null)
     {
-        return Results.NotFound(new { error = "Mock user not found." });
+        return Results.NotFound(new { error = "User not found." });
     }
 
-    return Results.Ok(new LoginResponse($"mock:{user.Id}", user));
+    return Results.Ok(new LoginResponse(MockDatabase.GenerateJwt(user), user));
 });
 
 app.MapGet("/events", (HttpRequest request) =>
@@ -170,8 +171,8 @@ sealed class MockDatabase
 
     public MockUser? GetCurrentUser(HttpRequest request)
     {
-        var userId = request.Headers["X-Mock-User-Id"].FirstOrDefault();
-        return string.IsNullOrWhiteSpace(userId) ? null : GetUserById(userId);
+        var sub = JwtSub(request.Headers.Authorization.FirstOrDefault());
+        return sub is null ? null : GetUserById(sub);
     }
 
     public MockUser? RequireRole(HttpRequest request, string role)
@@ -682,10 +683,41 @@ sealed class MockDatabase
     }
 
     private static string NewId() => Guid.NewGuid().ToString("N");
+
+    public static string GenerateJwt(MockUser user)
+    {
+        var header = B64U("{\"alg\":\"none\",\"typ\":\"JWT\"}");
+        var payload = B64U(JsonSerializer.Serialize(new
+        {
+            sub = user.Id, email = user.Email, role = user.Role, name = user.DisplayName,
+            iat = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+            exp = DateTimeOffset.UtcNow.AddHours(8).ToUnixTimeSeconds()
+        }));
+        return $"{header}.{payload}.";
+    }
+
+    private static string B64U(string s) =>
+        Convert.ToBase64String(Encoding.UTF8.GetBytes(s)).TrimEnd('=')
+            .Replace('+', '-').Replace('/', '_');
+
+    private static string? JwtSub(string? authHeader)
+    {
+        if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer ")) return null;
+        var parts = authHeader["Bearer ".Length..].Split('.');
+        if (parts.Length < 2) return null;
+        try
+        {
+            var pad = parts[1].Replace('-', '+').Replace('_', '/');
+            pad = pad.PadRight(pad.Length + (4 - pad.Length % 4) % 4, '=');
+            using var doc = JsonDocument.Parse(Encoding.UTF8.GetString(Convert.FromBase64String(pad)));
+            return doc.RootElement.GetProperty("sub").GetString();
+        }
+        catch { return null; }
+    }
 }
 
 sealed record MockUser(string Id, string Email, string Role, string DisplayName);
-sealed record LoginRequest(string Email);
+sealed record LoginRequest(string Email, string Password = "");
 sealed record LoginResponse(string Token, MockUser User);
 sealed class EventUpsertRequest
 {

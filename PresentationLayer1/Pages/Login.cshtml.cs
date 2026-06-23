@@ -4,7 +4,7 @@ using PresentationLayer1.Services;
 
 namespace PresentationLayer1.Pages;
 
-public sealed class LoginModel(IMockApiClient api, IAuthSession auth, IConfiguration config) : PageModel
+public sealed class LoginModel(IApiClient api, IAuthSession auth, IConfiguration config) : PageModel
 {
     [BindProperty]
     public string Email { get; set; } = "student1@school.local";
@@ -31,7 +31,7 @@ public sealed class LoginModel(IMockApiClient api, IAuthSession auth, IConfigura
     {
         IsMockLogin = config.GetValue<bool>("MOCK_LOGIN", false);
 
-        var login = await api.LoginAsync(Email, cancellationToken);
+        var login = await api.LoginAsync(Email, Password, cancellationToken);
         if (login is null)
         {
             ModelState.AddModelError(string.Empty, IsMockLogin ? "Mock user not found." : "Invalid email or password.");

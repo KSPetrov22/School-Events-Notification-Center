@@ -23,7 +23,7 @@ builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession();
 
 var mockApiBaseUrl = builder.Configuration["MockApiBaseUrl"] ?? "http://localhost:5090";
-builder.Services.AddHttpClient<IMockApiClient, MockApiClient>(client =>
+builder.Services.AddHttpClient<IApiClient, ApiClient>(client =>
 {
     client.BaseAddress = new Uri(mockApiBaseUrl);
 });

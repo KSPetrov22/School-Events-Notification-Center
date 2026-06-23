@@ -4,7 +4,7 @@ using PresentationLayer1.Services;
 
 namespace PresentationLayer1.Pages.Organizer.Events;
 
-public sealed class PreviewModel(IMockApiClient api) : PageModel
+public sealed class PreviewModel(IApiClient api) : PageModel
 {
     public EventSummary? Event { get; private set; }
 
