@@ -1,0 +1,45 @@
+@page "{id?}"
+@model PresentationLayer1.Pages.Organizer.Events.EditModel
+@{
+    ViewData["Title"] = Model.Id is null ? "New event" : "Edit event";
+}
+
+<section class="panel">
+  <h1>@ViewData["Title"]</h1>
+  <form method="post" class="form-grid">
+    <label>
+      Title
+      <input asp-for="Input.Title" />
+      <span asp-validation-for="Input.Title"></span>
+    </label>
+    <label>
+      Description
+      <textarea asp-for="Input.Description" rows="5"></textarea>
+      <span asp-validation-for="Input.Description"></span>
+    </label>
+    <label>
+      Starts at
+      <input asp-for="Input.StartsAt" />
+      <span asp-validation-for="Input.StartsAt"></span>
+    </label>
+    <label>
+      Ends at
+      <input asp-for="Input.EndsAt" />
+      <span asp-validation-for="Input.EndsAt"></span>
+    </label>
+    <label>
+      Capacity
+      <input asp-for="Input.Capacity" type="number" min="1" />
+      <span asp-validation-for="Input.Capacity"></span>
+    </label>
+    <label>
+      Location or URL
+      <input asp-for="Input.Location" />
+    </label>
+    <div class="actions">
+      <button type="submit">Save draft</button>
+      <a class="button secondary" asp-page="/Organizer/Events/Index">Back</a>
+    </div>
+  </form>
+</section>
+

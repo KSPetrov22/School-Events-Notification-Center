@@ -37,6 +37,7 @@ DataAccessLayer3/Db/*.db
 DataAccessLayer3/Db/*.db-*
 DataAccessLayer3/Db/InitDb/bin/
 DataAccessLayer3/Db/InitDb/obj/
+MockServer/App_Data/
 
 # Publish output
 publish/

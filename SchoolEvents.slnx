@@ -3,4 +3,5 @@
   <Project Path="BusinessLogicLayer2/BusinessLogicLayer2.csproj" />
   <Project Path="DataAccessLayer3/DataAccessLayer3.csproj" />
   <Project Path="Worker/Worker.csproj" />
+  <Project Path="MockServer/MockServer.csproj" />
 </Solution>

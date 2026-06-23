@@ -1,0 +1,40 @@
+@page "{id}"
+@model PresentationLayer1.Pages.Organizer.Events.RegistrationsModel
+@{
+    ViewData["Title"] = "Event signups";
+}
+
+<section class="page-heading">
+  <div>
+    <h1>@Model.Event?.Title signups</h1>
+    <p class="muted">Confirmed registrations and FIFO waitlist.</p>
+  </div>
+</section>
+
+<section class="split">
+  <div class="panel">
+    <h2>Confirmed</h2>
+    <table>
+      <thead><tr><th>Name</th><th>Email</th><th>Registered</th></tr></thead>
+      <tbody>
+      @foreach (var item in Model.Confirmed)
+      {
+        <tr><td>@item.UserDisplayName</td><td>@item.UserEmail</td><td>@item.RegisteredAt</td></tr>
+      }
+      </tbody>
+    </table>
+  </div>
+  <div class="panel">
+    <h2>Waitlist</h2>
+    <table>
+      <thead><tr><th>#</th><th>Name</th><th>Email</th></tr></thead>
+      <tbody>
+      @foreach (var item in Model.Waitlist)
+      {
+        <tr><td>@item.WaitlistPosition</td><td>@item.UserDisplayName</td><td>@item.UserEmail</td></tr>
+      }
+      </tbody>
+    </table>
+  </div>
+</section>
+
