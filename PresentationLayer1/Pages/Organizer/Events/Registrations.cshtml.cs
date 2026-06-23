@@ -4,7 +4,7 @@ using PresentationLayer1.Services;
 
 namespace PresentationLayer1.Pages.Organizer.Events;
 
-public sealed class RegistrationsModel(IMockApiClient api) : PageModel
+public sealed class RegistrationsModel(IApiClient api) : PageModel
 {
     public EventSummary? Event { get; private set; }
     public IReadOnlyList<RegistrationSummary> Confirmed { get; private set; } = [];

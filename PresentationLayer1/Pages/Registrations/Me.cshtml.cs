@@ -5,7 +5,7 @@ using PresentationLayer1.Services;
 
 namespace PresentationLayer1.Pages.Registrations;
 
-public sealed class MeModel(IMockApiClient api) : PageModel
+public sealed class MeModel(IApiClient api) : PageModel
 {
     public IReadOnlyList<RegistrationSummary> Registrations { get; private set; } = [];
 

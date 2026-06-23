@@ -5,7 +5,7 @@ using PresentationLayer1.Services;
 
 namespace PresentationLayer1.Pages.Events;
 
-public sealed class DetailsModel(IMockApiClient api, IAuthSession auth) : PageModel
+public sealed class DetailsModel(IApiClient api, IAuthSession auth) : PageModel
 {
     public EventSummary? Event { get; private set; }
     public IAuthSession Auth => auth;

@@ -2,9 +2,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace PresentationLayer1.Models;
 
-public sealed record MockUser(string Id, string Email, string Role, string DisplayName);
+public sealed record UserInfo(string Id, string Email, string Role, string DisplayName);
 
-public sealed record LoginResponse(string Token, MockUser User);
+public sealed record LoginResponse(string Token, UserInfo User);
 
 public sealed record EventSummary(
     string Id,
@@ -54,4 +54,4 @@ public sealed class EventUpsertRequest
     public string? Location { get; set; }
 }
 
-public sealed record LoginRequest([Required] string Email);
+public sealed record LoginRequest([Required] string Email, string Password = "");

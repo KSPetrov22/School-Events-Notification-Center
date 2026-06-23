@@ -5,7 +5,7 @@ using PresentationLayer1.Services;
 
 namespace PresentationLayer1.Pages.Organizer.Events;
 
-public sealed class EditModel(IMockApiClient api) : PageModel
+public sealed class EditModel(IApiClient api) : PageModel
 {
     [BindProperty(SupportsGet = true)]
     public string? Id { get; set; }

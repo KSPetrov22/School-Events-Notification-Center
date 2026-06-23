@@ -62,7 +62,7 @@ successful notification log per job.
 
 - Target framework: `net10.0`
 - **PresentationLayer1**: ASP.NET Core Razor Pages, session auth, typed HttpClient
-  (`MockApiClient`), JWT bearer auth package, DotNetEnv
+  (`ApiClient`), JWT bearer auth package, DotNetEnv
 - **MockServer**: ASP.NET Core Minimal API, Microsoft.Data.Sqlite, single-file architecture
 - **BusinessLogicLayer2**: BCrypt.Net-Next, MailKit, DI abstractions
 - **DataAccessLayer3**: EF Core 9, EF Core SQLite, EFCore.NamingConventions
@@ -105,8 +105,8 @@ Pages/
   Organizer/Events/          organizer CRUD, preview, registrations list
   Login.cshtml               real login form (default) or mock dropdown (MOCK_LOGIN=true)
 Services/
-  IMockApiClient / MockApiClient   typed HttpClient calling MockServer
-  IAuthSession / AuthSession       session-based user identity (id/email/role/name)
+  IApiClient / ApiClient       typed HttpClient calling the backend API (mock or real)
+  IAuthSession / AuthSession   session-based user identity (id/email/role/name)
 wwwroot/
   app.js      local-timezone time display, copy-link clipboard buttons
   style.css   responsive styles
@@ -128,7 +128,9 @@ wwwroot/
 - The `DataAccessLayer3/DataAccessLayer3.csproj` excludes `Db/InitDb/**` via
   `<Compile Remove>` to prevent the nested InitDb `Program.cs` from conflicting
   with the parent project's compilation.
-- DotNetEnv 3.x removed `Env.TraverseUp()`; use `Env.Load()` instead.
+- DotNetEnv 3.x removed `Env.TraverseUp()`. Both hosts use a one-level traversal:
+  load `.env` from CWD if present, otherwise try `../.env` — so `dotnet run --project`
+  invocations from the project directory still find the repo-root `.env`.
 - Config is read via `builder.Configuration["KEY"]`, not `Environment.GetEnvironmentVariable`,
   so `appsettings.*.json` values take effect even without a `.env` file.
 

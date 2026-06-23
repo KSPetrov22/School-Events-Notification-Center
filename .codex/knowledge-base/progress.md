@@ -6,8 +6,8 @@
 - Static assets under `PresentationLayer1/wwwroot`.
 - Mock backend target: separate root-level `MockServer` project (port 5090).
 - Mock storage: SQLite file initialized from `DataAccessLayer3/Db/schema.sql`.
-- Razor Pages call the mock server through typed C# client services (`IMockApiClient`).
-- Future backend swap requires only configuration and client changes, not UI rewrites.
+- Razor Pages call the backend through typed C# client services (`IApiClient`).
+- Future backend swap: only change `MockApiBaseUrl` in config — no UI changes.
 
 ## Plan Progress
 
@@ -36,6 +36,9 @@ workflows are wired to the MockServer and verified running on .NET 10.
   instead of returning a raw 404.
 - TempData error/message flash notifications in `_Layout.cshtml`.
 - `wwwroot/app.js` for all browser-side enhancements (time conversion, clipboard).
+- API client renamed `MockApiClient` → `ApiClient` (`IApiClient`); `MockUser` → `UserInfo`.
+  MockServer now issues `alg:none` JWTs at login and reads user identity from `Authorization: Bearer`.
+  Switching to the real backend requires only changing `MockApiBaseUrl` in config.
 
 **MOCK_LOGIN toggle:**
 
@@ -78,5 +81,5 @@ dotnet run --project Worker
 
 - `BusinessLogicLayer2/Services/` and `DataAccessLayer3/Models/` are still empty (`TODO`).
 - `Worker/NotificationWorker.cs` is a poll-loop skeleton only.
-- Mock auth uses `X-Mock-User-Id` header; real JWT auth wiring is not done.
 - MockServer is temporary — the real REST surface should mirror its contract.
+  When swapping, point `MockApiBaseUrl` at the real API; `ApiClient` needs no changes.
