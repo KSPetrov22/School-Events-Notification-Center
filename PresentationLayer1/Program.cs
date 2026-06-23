@@ -5,8 +5,9 @@ using PresentationLayer1.Services;
 // Entry point (= the reference's main/app.py): load config, wire the layers,
 // serve the static UI, expose the API. Skeleton only — features go in per epic.
 
-// Load .env (see .env.example) into environment variables for local dev.
-Env.Load();
+// Load .env from CWD; fall back one level up for `dotnet run --project` invocations
+var envPath = File.Exists(".env") ? ".env" : Path.Combine("..", ".env");
+Env.Load(envPath);
 
 var builder = WebApplication.CreateBuilder(args);
 
