@@ -4,37 +4,64 @@
     ViewData["Title"] = "Event signups";
 }
 
-<section class="page-heading">
+<section class="page-heading reveal">
   <div>
-    <h1>@Model.Event?.Title signups</h1>
-    <p class="muted">Confirmed registrations and FIFO waitlist.</p>
+    <h1>@Model.Event?.Title</h1>
+    <p class="muted">@Model.Confirmed.Count confirmed · @Model.Waitlist.Count on waitlist</p>
   </div>
+  <a class="button secondary" asp-page="/Organizer/Events/Index">← Back</a>
 </section>
 
-<section class="split">
+<section class="split reveal">
   <div class="panel">
-    <h2>Confirmed</h2>
-    <table>
-      <thead><tr><th>Name</th><th>Email</th><th>Registered</th></tr></thead>
-      <tbody>
-      @foreach (var item in Model.Confirmed)
-      {
-        <tr><td>@item.UserDisplayName</td><td>@item.UserEmail</td><td>@item.RegisteredAt</td></tr>
-      }
-      </tbody>
-    </table>
+    <h2>✅ Confirmed (@Model.Confirmed.Count)</h2>
+    @if (Model.Confirmed.Count == 0)
+    {
+      <p class="muted" style="margin-top:16px">No confirmed registrations yet.</p>
+    }
+    else
+    {
+      <div class="table-wrap" style="margin-top:16px">
+        <table>
+          <thead><tr><th>Name</th><th>Email</th><th>Registered</th></tr></thead>
+          <tbody>
+          @foreach (var item in Model.Confirmed)
+          {
+            <tr>
+              <td><strong>@item.UserDisplayName</strong></td>
+              <td>@item.UserEmail</td>
+              <td><time class="local-time" datetime="@item.RegisteredAt">@item.RegisteredAt</time></td>
+            </tr>
+          }
+          </tbody>
+        </table>
+      </div>
+    }
   </div>
+
   <div class="panel">
-    <h2>Waitlist</h2>
-    <table>
-      <thead><tr><th>#</th><th>Name</th><th>Email</th></tr></thead>
-      <tbody>
-      @foreach (var item in Model.Waitlist)
-      {
-        <tr><td>@item.WaitlistPosition</td><td>@item.UserDisplayName</td><td>@item.UserEmail</td></tr>
-      }
-      </tbody>
-    </table>
+    <h2>⏳ Waitlist (@Model.Waitlist.Count)</h2>
+    @if (Model.Waitlist.Count == 0)
+    {
+      <p class="muted" style="margin-top:16px">Waitlist is empty.</p>
+    }
+    else
+    {
+      <div class="table-wrap" style="margin-top:16px">
+        <table>
+          <thead><tr><th>#</th><th>Name</th><th>Email</th></tr></thead>
+          <tbody>
+          @foreach (var item in Model.Waitlist)
+          {
+            <tr>
+              <td><span class="badge waitlisted">#@item.WaitlistPosition</span></td>
+              <td><strong>@item.UserDisplayName</strong></td>
+              <td>@item.UserEmail</td>
+            </tr>
+          }
+          </tbody>
+        </table>
+      </div>
+    }
   </div>
 </section>
-

@@ -6,49 +6,92 @@
 
 @if (Model.Event is null)
 {
-  <section class="panel"><h1>Event not found</h1></section>
+  <section class="panel empty-state">
+    <div class="empty-state-icon">😕</div>
+    <h1>Event not found</h1>
+    <p class="muted">This event may have been removed or the link is incorrect.</p>
+    <a class="button" asp-page="/Events/Index">Back to events</a>
+  </section>
 }
 else
 {
-  <section class="panel">
+  var pct = Model.Event.Capacity > 0
+    ? (int)Math.Round(100.0 * Model.Event.ConfirmedCount / Model.Event.Capacity)
+    : 0;
+  var fillClass = Model.Event.IsFull ? "full" : pct >= 80 ? "high" : "";
+
+  <section class="panel detail-hero reveal">
     <div class="card-head">
-      <h1>@Model.Event.Title</h1>
-      <span class="badge @Model.Event.Status.ToLowerInvariant()">@Model.Event.Status</span>
+      <div>
+        <span class="badge @Model.Event.Status.ToLowerInvariant()">@Model.Event.Status</span>
+        <h1>@Model.Event.Title</h1>
+      </div>
     </div>
-    <p>@Model.Event.Description</p>
-    <dl class="meta">
-      <div><dt>Starts</dt><dd><time class="local-time" datetime="@Model.Event.StartsAt">@Model.Event.StartsAt</time></dd></div>
-      <div><dt>Ends</dt><dd><time class="local-time" datetime="@Model.Event.EndsAt">@Model.Event.EndsAt</time></dd></div>
-      <div><dt>Location</dt><dd>@(Model.Event.Location ?? "TBA")</dd></div>
-      <div><dt>Confirmed</dt><dd>@Model.Event.ConfirmedCount / @Model.Event.Capacity</dd></div>
-      <div><dt>Waitlist</dt><dd>@Model.Event.WaitlistCount</dd></div>
+    <p style="font-size:1.05rem;margin-top:12px">@Model.Event.Description</p>
+
+    <div class="capacity-bar" style="margin-top:20px">
+      <div class="capacity-label">
+        <span>Registration status</span>
+        <span>
+          @if (Model.Event.IsFull)
+          {
+            <text>Full — waitlist open (@Model.Event.WaitlistCount waiting)</text>
+          }
+          else
+          {
+            <text>@Model.Event.ConfirmedCount of @Model.Event.Capacity seats taken</text>
+          }
+        </span>
+      </div>
+      <div class="capacity-track" style="height:12px">
+        <div class="capacity-fill @fillClass" style="width: @(Math.Min(pct, 100))%"></div>
+      </div>
+    </div>
+
+    <dl class="meta" style="margin-top:20px">
+      <div><dt>📅 Starts</dt><dd><time class="local-time" datetime="@Model.Event.StartsAt">@Model.Event.StartsAt</time></dd></div>
+      <div><dt>🏁 Ends</dt><dd><time class="local-time" datetime="@Model.Event.EndsAt">@Model.Event.EndsAt</time></dd></div>
+      <div><dt>📍 Location</dt><dd>@(Model.Event.Location ?? "TBA")</dd></div>
+      <div><dt>👥 Confirmed</dt><dd>@Model.Event.ConfirmedCount / @Model.Event.Capacity</dd></div>
+      @if (Model.Event.WaitlistCount > 0)
+      {
+        <div><dt>⏳ Waitlist</dt><dd>@Model.Event.WaitlistCount students</dd></div>
+      }
     </dl>
 
-    <div class="actions">
-      <button class="button secondary js-copy-link">Copy link</button>
+    <div class="detail-actions">
+      <button class="button secondary js-copy-link" type="button">🔗 Copy link</button>
+
       @if (!Model.Auth.IsSignedIn)
       {
-        <a class="button" asp-page="/Login">Login to register</a>
+        <a class="button accent" asp-page="/Login">Login to register</a>
       }
       else if (Model.Auth.IsStudent && Model.Event.CurrentUserRegistrationId is null)
       {
         <form method="post" asp-page-handler="Register">
-          <button type="submit">@(Model.Event.IsFull ? "Join waitlist" : "Register")</button>
+          <button type="submit" class="@(Model.Event.IsFull ? "secondary" : "accent")">
+            @(Model.Event.IsFull ? "Join waitlist" : "Register now")
+          </button>
         </form>
       }
       else if (Model.Auth.IsStudent)
       {
-        <span class="badge">@Model.Event.CurrentUserRegistrationStatus</span>
-        @if (Model.Event.CurrentUserWaitlistPosition is int position)
-        {
-          <span class="muted">Position @position</span>
-        }
+        <div class="registration-status">
+          <span class="badge @Model.Event.CurrentUserRegistrationStatus?.ToLowerInvariant()">
+            @Model.Event.CurrentUserRegistrationStatus
+          </span>
+          @if (Model.Event.CurrentUserWaitlistPosition is int position)
+          {
+            <span class="muted">Waitlist position #@position</span>
+          }
+        </div>
         <form method="post" asp-page-handler="Cancel">
           <input type="hidden" name="registrationId" value="@Model.Event.CurrentUserRegistrationId" />
           <button type="submit" class="danger">Cancel registration</button>
         </form>
       }
+
+      <a class="button secondary" asp-page="/Events/Index">← All events</a>
     </div>
   </section>
 }
-

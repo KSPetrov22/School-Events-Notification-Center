@@ -6,17 +6,21 @@
 
 @if (Model.Event is not null)
 {
-  <section class="panel">
-    <p class="muted">Student preview</p>
-    <h1>@Model.Event.Title</h1>
-    <p>@Model.Event.Description</p>
-    <dl class="meta">
-      <div><dt>Starts</dt><dd><time class="local-time" datetime="@Model.Event.StartsAt">@Model.Event.StartsAt</time></dd></div>
-      <div><dt>Ends</dt><dd><time class="local-time" datetime="@Model.Event.EndsAt">@Model.Event.EndsAt</time></dd></div>
-      <div><dt>Location</dt><dd>@(Model.Event.Location ?? "TBA")</dd></div>
-      <div><dt>Capacity</dt><dd>@Model.Event.Capacity</dd></div>
+  <section class="panel reveal">
+    <span class="badge draft">Student preview</span>
+    <h1 style="margin-top:12px">@Model.Event.Title</h1>
+    <p style="font-size:1.05rem">@Model.Event.Description</p>
+
+    <dl class="meta" style="margin-top:20px">
+      <div><dt>📅 Starts</dt><dd><time class="local-time" datetime="@Model.Event.StartsAt">@Model.Event.StartsAt</time></dd></div>
+      <div><dt>🏁 Ends</dt><dd><time class="local-time" datetime="@Model.Event.EndsAt">@Model.Event.EndsAt</time></dd></div>
+      <div><dt>📍 Location</dt><dd>@(Model.Event.Location ?? "TBA")</dd></div>
+      <div><dt>👥 Capacity</dt><dd>@Model.Event.Capacity seats</dd></div>
     </dl>
-    <a class="button secondary" asp-page="/Organizer/Events/Index">Back</a>
+
+    <div class="detail-actions">
+      <a class="button secondary" asp-page="/Organizer/Events/Index">← Back to dashboard</a>
+      <a class="button" asp-page="/Organizer/Events/Edit" asp-route-id="@Model.Event.Id">Edit event</a>
+    </div>
   </section>
 }
-

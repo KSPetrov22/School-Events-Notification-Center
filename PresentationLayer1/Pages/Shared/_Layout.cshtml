@@ -5,12 +5,17 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Discover and register for school events — workshops, clubs, and more." />
   <title>@ViewData["Title"] - School Events</title>
   <link rel="stylesheet" href="~/style.css" asp-append-version="true" />
 </head>
 <body>
   <header class="site-header">
-    <a class="brand" asp-page="/Events/Index">School Events</a>
+    <a class="brand" asp-page="/Events/Index">
+      <span class="brand-icon" aria-hidden="true">🎓</span>
+      School Events
+    </a>
+    <button class="nav-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false">☰</button>
     <nav aria-label="Primary">
       <a asp-page="/Events/Index">Events</a>
       @if (Auth.IsStudent)
@@ -23,12 +28,12 @@
       }
       @if (Auth.IsSignedIn)
       {
-        <span class="nav-user">@Auth.CurrentUser?.DisplayName (@Auth.CurrentUser?.Role.ToLowerInvariant())</span>
+        <span class="nav-user">@Auth.CurrentUser?.DisplayName · @Auth.CurrentUser?.Role.ToLowerInvariant()</span>
         <a asp-page="/Login" asp-page-handler="Logout">Logout</a>
       }
       else
       {
-        <a asp-page="/Login">Login</a>
+        <a asp-page="/Login" class="accent">Login</a>
       }
     </nav>
   </header>
@@ -44,7 +49,11 @@
     }
     @RenderBody()
   </main>
+
+  <footer class="site-footer">
+    <strong>School Events</strong> — Discover, register, and never miss what matters.
+  </footer>
+
   <script src="~/app.js" asp-append-version="true"></script>
 </body>
 </html>
-

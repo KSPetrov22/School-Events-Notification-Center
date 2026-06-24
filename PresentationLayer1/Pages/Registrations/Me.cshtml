@@ -2,43 +2,74 @@
 @model PresentationLayer1.Pages.Registrations.MeModel
 @{
     ViewData["Title"] = "My signups";
+    var confirmed = Model.Registrations.Count(r => r.Status == "CONFIRMED");
+    var waitlisted = Model.Registrations.Count(r => r.Status == "WAITLISTED");
 }
 
-<section class="page-heading">
-  <div>
+<section class="hero reveal" style="padding:36px 32px;margin-bottom:28px">
+  <div class="hero-content">
+    <span class="hero-badge">Your registrations</span>
     <h1>My signups</h1>
-    <p class="muted">Your current registrations and waitlist positions.</p>
+    <p>Track confirmed spots and waitlist positions for all your events.</p>
   </div>
 </section>
 
-<section class="panel">
-  <table>
-    <thead>
-      <tr>
-        <th>Event</th>
-        <th>Status</th>
-        <th>Waitlist</th>
-        <th>Registered</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-    @foreach (var registration in Model.Registrations)
-    {
-      <tr>
-        <td>@registration.EventTitle</td>
-        <td><span class="badge">@registration.Status</span></td>
-        <td>@(registration.WaitlistPosition?.ToString() ?? "-")</td>
-        <td>@registration.RegisteredAt</td>
-        <td>
-          <form method="post" asp-page-handler="Cancel">
-            <input type="hidden" name="registrationId" value="@registration.Id" />
-            <button class="danger" type="submit">Cancel</button>
-          </form>
-        </td>
-      </tr>
-    }
-    </tbody>
-  </table>
-</section>
+<div class="stats-row reveal">
+  <div class="stat-card">
+    <div class="stat-value">@Model.Registrations.Count</div>
+    <div class="stat-label">Total signups</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">@confirmed</div>
+    <div class="stat-label">Confirmed</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">@waitlisted</div>
+    <div class="stat-label">On waitlist</div>
+  </div>
+</div>
 
+@if (Model.Registrations.Count == 0)
+{
+  <section class="panel empty-state reveal">
+    <div class="empty-state-icon">📝</div>
+    <h2>No signups yet</h2>
+    <p class="muted">Browse events and register for something that interests you.</p>
+    <a class="button accent" asp-page="/Events/Index">Browse events</a>
+  </section>
+}
+else
+{
+  <section class="panel reveal">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Event</th>
+            <th>Status</th>
+            <th>Waitlist</th>
+            <th>Registered</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+        @foreach (var registration in Model.Registrations)
+        {
+          <tr>
+            <td><strong>@registration.EventTitle</strong></td>
+            <td><span class="badge @registration.Status.ToLowerInvariant()">@registration.Status</span></td>
+            <td>@(registration.WaitlistPosition is int pos ? $"#{pos}" : "—")</td>
+            <td><time class="local-time" datetime="@registration.RegisteredAt">@registration.RegisteredAt</time></td>
+            <td>
+              <form method="post" asp-page-handler="Cancel">
+                <input type="hidden" name="registrationId" value="@registration.Id" />
+                <button class="danger" type="submit">Cancel</button>
+              </form>
+            </td>
+          </tr>
+        }
+        </tbody>
+      </table>
+    </div>
+  </section>
+}

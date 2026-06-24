@@ -2,38 +2,104 @@
 @model PresentationLayer1.Pages.Events.IndexModel
 @{
     ViewData["Title"] = "Events";
+    var totalEvents = Model.Events.Count;
+    var openSeats = Model.Events.Count(e => !e.IsFull);
+    var totalRegistered = Model.Events.Sum(e => e.ConfirmedCount);
 }
 
-<section class="page-heading">
-  <div>
-    <h1>Events</h1>
-    <p class="muted">Browse published school events and register while seats are available.</p>
+<section class="hero reveal">
+  <div class="hero-content">
+    <span class="hero-badge">✨ What's happening at school</span>
+    <h1>Discover events worth your time</h1>
+    <p>Browse workshops, clubs, and demos. Register in seconds — or join the waitlist when seats fill up.</p>
   </div>
 </section>
 
+<div class="stats-row reveal">
+  <div class="stat-card">
+    <div class="stat-value">@totalEvents</div>
+    <div class="stat-label">Published events</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">@openSeats</div>
+    <div class="stat-label">With open seats</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">@totalRegistered</div>
+    <div class="stat-label">Students registered</div>
+  </div>
+</div>
+
+<div class="toolbar reveal">
+  <div class="search-box">
+    <input type="search" id="event-search" placeholder="Search events by title or description…" autocomplete="off" />
+  </div>
+  <div class="filter-pills">
+    <button type="button" class="filter-pill active" data-filter="all">All</button>
+    <button type="button" class="filter-pill" data-filter="available">Open seats</button>
+    <button type="button" class="filter-pill" data-filter="full">Waitlist only</button>
+  </div>
+</div>
+
 <div class="grid">
+@if (Model.Events.Count == 0)
+{
+  <div class="empty-state">
+    <div class="empty-state-icon">📅</div>
+    <h2>No events yet</h2>
+    <p class="muted">Check back soon — new events are added regularly.</p>
+  </div>
+}
 @foreach (var item in Model.Events)
 {
-  <article class="card">
-    <div class="card-head">
-      <h2>@item.Title</h2>
-      <span class="badge @item.Status.ToLowerInvariant()">@item.Status</span>
-    </div>
-    <p>@item.Description</p>
-    <dl class="meta">
-      <div><dt>Starts</dt><dd><time class="local-time" datetime="@item.StartsAt">@item.StartsAt</time></dd></div>
-      <div><dt>Where</dt><dd>@(item.Location ?? "TBA")</dd></div>
-      <div><dt>Seats</dt><dd>@item.ConfirmedCount / @item.Capacity</dd></div>
-      <div><dt>Waitlist</dt><dd>@item.WaitlistCount</dd></div>
-    </dl>
-    <div class="actions">
-      <a class="button secondary" asp-page="/Events/Details" asp-route-id="@item.Id">Details</a>
-      @if (item.IsFull)
-      {
-        <span class="muted">Waitlist open</span>
-      }
+  var pct = item.Capacity > 0 ? (int)Math.Round(100.0 * item.ConfirmedCount / item.Capacity) : 0;
+  var fillClass = item.IsFull ? "full" : pct >= 80 ? "high" : "";
+  var accentClass = item.IsFull ? "full" : item.WaitlistCount > 0 ? "waitlist" : "open";
+
+  <article class="card js-event-card"
+           data-title="@item.Title"
+           data-description="@item.Description"
+           data-status="@item.Status.ToLowerInvariant()"
+           data-full="@item.IsFull.ToString().ToLowerInvariant()">
+    <div class="card-accent @accentClass"></div>
+    <div class="card-body">
+      <div class="card-head">
+        <h2>@item.Title</h2>
+        <span class="badge @item.Status.ToLowerInvariant()">@item.Status</span>
+      </div>
+      <p class="muted">@item.Description</p>
+
+      <div class="capacity-bar">
+        <div class="capacity-label">
+          <span>Seats</span>
+          <span>@item.ConfirmedCount / @item.Capacity @(item.IsFull ? "· Full" : "")</span>
+        </div>
+        <div class="capacity-track">
+          <div class="capacity-fill @fillClass" style="width: @(Math.Min(pct, 100))%"></div>
+        </div>
+      </div>
+
+      <dl class="meta">
+        <div><dt>📅 Starts</dt><dd><time class="local-time" datetime="@item.StartsAt">@item.StartsAt</time></dd></div>
+        <div><dt>📍 Where</dt><dd>@(item.Location ?? "TBA")</dd></div>
+        @if (item.WaitlistCount > 0)
+        {
+          <div><dt>⏳ Waitlist</dt><dd>@item.WaitlistCount waiting</dd></div>
+        }
+      </dl>
+
+      <div class="actions">
+        <a class="button @(item.IsFull ? "secondary" : "")" asp-page="/Events/Details" asp-route-id="@item.Id">
+          @(item.IsFull ? "Join waitlist" : "Register now")
+        </a>
+        <a class="button secondary" asp-page="/Events/Details" asp-route-id="@item.Id">Details</a>
+      </div>
     </div>
   </article>
 }
+  <div class="empty-state js-filter-empty" hidden>
+    <div class="empty-state-icon">🔍</div>
+    <h2>No matching events</h2>
+    <p class="muted">Try a different search or filter.</p>
+  </div>
 </div>
-

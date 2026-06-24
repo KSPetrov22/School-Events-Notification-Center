@@ -2,65 +2,120 @@
 @model PresentationLayer1.Pages.Organizer.Events.IndexModel
 @{
     ViewData["Title"] = "Organizer events";
+    var published = Model.Events.Count(e => e.Status == "PUBLISHED");
+    var drafts = Model.Events.Count(e => e.Status == "DRAFT");
+    var totalSignups = Model.Events.Sum(e => e.ConfirmedCount);
 }
 
-<section class="page-heading">
-  <div>
-    <h1>Organizer events</h1>
-    <p class="muted">Manage drafts, publish events, and review signups.</p>
+<section class="hero reveal" style="padding:36px 32px;margin-bottom:28px">
+  <div class="hero-content">
+    <span class="hero-badge">Organizer dashboard</span>
+    <h1>Your events</h1>
+    <p>Create drafts, publish when ready, and manage registrations and waitlists.</p>
   </div>
-  <a class="button" asp-page="/Organizer/Events/Edit">New event</a>
+</section>
+
+<div class="stats-row reveal">
+  <div class="stat-card">
+    <div class="stat-value">@Model.Events.Count</div>
+    <div class="stat-label">Total events</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">@published</div>
+    <div class="stat-label">Published</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">@drafts</div>
+    <div class="stat-label">Drafts</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">@totalSignups</div>
+    <div class="stat-label">Total signups</div>
+  </div>
+</div>
+
+<section class="page-heading reveal">
+  <div></div>
+  <a class="button accent" asp-page="/Organizer/Events/Edit">+ New event</a>
 </section>
 
 <div class="grid">
+@if (Model.Events.Count == 0)
+{
+  <div class="empty-state">
+    <div class="empty-state-icon">📋</div>
+    <h2>No events yet</h2>
+    <p class="muted">Create your first event and publish it when you're ready.</p>
+    <a class="button accent" asp-page="/Organizer/Events/Edit">Create event</a>
+  </div>
+}
 @foreach (var item in Model.Events)
 {
-  <article class="card">
-    <div class="card-head">
-      <h2>@item.Title</h2>
-      <span class="badge @item.Status.ToLowerInvariant()">@item.Status</span>
-      @if (item.IsFull)
-      {
-        <span class="badge cancelled">FULL</span>
-      }
-    </div>
-    <p>@item.Description</p>
-    <dl class="meta">
-      <div><dt>Starts</dt><dd><time class="local-time" datetime="@item.StartsAt">@item.StartsAt</time></dd></div>
-      <div><dt>Seats</dt><dd>@item.ConfirmedCount / @item.Capacity</dd></div>
-      <div><dt>Waitlist</dt><dd>@item.WaitlistCount</dd></div>
-      @if (!string.IsNullOrEmpty(item.Location))
-      {
-        <div><dt>Where</dt><dd>@item.Location</dd></div>
-      }
-    </dl>
-    <div class="actions">
-      @if (item.Status != "CANCELLED")
-      {
-        <a class="button secondary" asp-page="/Organizer/Events/Edit" asp-route-id="@item.Id">Edit</a>
-      }
-      <a class="button secondary" asp-page="/Organizer/Events/Preview" asp-route-id="@item.Id">Preview</a>
-      <a class="button secondary" asp-page="/Organizer/Events/Registrations" asp-route-id="@item.Id">Signups</a>
-      @if (item.Status == "PUBLISHED")
-      {
-        <a class="button secondary" asp-page="/Events/Details" asp-route-id="@item.Id" target="_blank">Public link</a>
-        <button class="button secondary js-copy-link"
-                data-url="@Url.Page("/Events/Details", new { id = item.Id })">Copy link</button>
-      }
-      @if (item.Status == "DRAFT")
-      {
-        <form method="post" asp-page-handler="Publish" asp-route-id="@item.Id">
-          <button type="submit">Publish</button>
-        </form>
-      }
-      @if (item.Status != "CANCELLED")
-      {
-        <form method="post" asp-page-handler="Cancel" asp-route-id="@item.Id">
-          <button type="submit" class="danger">Cancel</button>
-        </form>
-      }
+  var pct = item.Capacity > 0 ? (int)Math.Round(100.0 * item.ConfirmedCount / item.Capacity) : 0;
+  var fillClass = item.IsFull ? "full" : pct >= 80 ? "high" : "";
+  var accentClass = item.Status == "CANCELLED" ? "full" : item.Status == "DRAFT" ? "waitlist" : "open";
+
+  <article class="card js-event-card">
+    <div class="card-accent @accentClass"></div>
+    <div class="card-body">
+      <div class="card-head">
+        <h2>@item.Title</h2>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span class="badge @item.Status.ToLowerInvariant()">@item.Status</span>
+          @if (item.IsFull)
+          {
+            <span class="badge cancelled">FULL</span>
+          }
+        </div>
+      </div>
+      <p class="muted">@item.Description</p>
+
+      <div class="capacity-bar">
+        <div class="capacity-label">
+          <span>Seats</span>
+          <span>@item.ConfirmedCount / @item.Capacity</span>
+        </div>
+        <div class="capacity-track">
+          <div class="capacity-fill @fillClass" style="width: @(Math.Min(pct, 100))%"></div>
+        </div>
+      </div>
+
+      <dl class="meta">
+        <div><dt>📅 Starts</dt><dd><time class="local-time" datetime="@item.StartsAt">@item.StartsAt</time></dd></div>
+        <div><dt>⏳ Waitlist</dt><dd>@item.WaitlistCount</dd></div>
+        @if (!string.IsNullOrEmpty(item.Location))
+        {
+          <div><dt>📍 Where</dt><dd>@item.Location</dd></div>
+        }
+      </dl>
+
+      <div class="actions">
+        @if (item.Status != "CANCELLED")
+        {
+          <a class="button secondary" asp-page="/Organizer/Events/Edit" asp-route-id="@item.Id">Edit</a>
+        }
+        <a class="button secondary" asp-page="/Organizer/Events/Preview" asp-route-id="@item.Id">Preview</a>
+        <a class="button secondary" asp-page="/Organizer/Events/Registrations" asp-route-id="@item.Id">Signups</a>
+        @if (item.Status == "PUBLISHED")
+        {
+          <a class="button secondary" asp-page="/Events/Details" asp-route-id="@item.Id" target="_blank">Public link</a>
+          <button class="button secondary js-copy-link" type="button"
+                  data-url="@Url.Page("/Events/Details", new { id = item.Id })">Copy link</button>
+        }
+        @if (item.Status == "DRAFT")
+        {
+          <form method="post" asp-page-handler="Publish" asp-route-id="@item.Id">
+            <button type="submit" class="accent">Publish</button>
+          </form>
+        }
+        @if (item.Status != "CANCELLED")
+        {
+          <form method="post" asp-page-handler="Cancel" asp-route-id="@item.Id">
+            <button type="submit" class="danger">Cancel event</button>
+          </form>
+        }
+      </div>
     </div>
   </article>
 }
 </div>
-
