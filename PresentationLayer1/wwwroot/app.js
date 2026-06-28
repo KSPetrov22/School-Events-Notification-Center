@@ -2,21 +2,36 @@
 document.querySelectorAll('time.local-time').forEach(el => {
   const d = new Date(el.dateTime);
   if (!isNaN(d)) {
-    el.textContent = d.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+    el.textContent = d.toLocaleString(undefined, {
+      dateStyle: 'medium',
+      timeStyle: 'short'
+    });
   }
 });
 
-// Copy-link buttons: data-url for a specific URL, or copies current page URL
+// Copy-link buttons
 document.querySelectorAll('.js-copy-link').forEach(btn => {
   btn.addEventListener('click', async () => {
+
     const url = btn.dataset.url
       ? new URL(btn.dataset.url, window.location.origin).href
       : window.location.href;
+
     try {
+
       await navigator.clipboard.writeText(url);
-      const orig = btn.textContent;
+
+      const originalText = btn.textContent;
+
       btn.textContent = 'Copied!';
-      setTimeout(() => { btn.textContent = orig; }, 1500);
-    } catch { /* clipboard unavailable */ }
+
+      setTimeout(() => {
+        btn.textContent = originalText;
+      }, 1500);
+
+    } catch (error) {
+      console.log('Clipboard not available');
+    }
+
   });
 });
