@@ -20,6 +20,7 @@
       @if (Auth.IsOrganizer)
       {
         <a asp-page="/Organizer/Events/Index">Organizer</a>
+        <a asp-page="/Organizer/Notifications">Notifications</a>
       }
       @if (Auth.IsSignedIn)
       {
@@ -47,4 +48,3 @@
   <script src="~/app.js" asp-append-version="true"></script>
 </body>
 </html>
-

@@ -17,6 +17,7 @@ public interface IApiClient
     Task<IReadOnlyList<RegistrationSummary>> GetMyRegistrationsAsync(CancellationToken cancellationToken = default);
     Task<IReadOnlyList<RegistrationSummary>> GetConfirmedRegistrationsAsync(string eventId, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<RegistrationSummary>> GetWaitlistAsync(string eventId, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<NotificationLogSummary>> GetNotificationLogsAsync(CancellationToken cancellationToken = default);
 }
 
 public sealed class ApiClient(HttpClient httpClient, IAuthSession authSession) : IApiClient
@@ -60,6 +61,9 @@ public sealed class ApiClient(HttpClient httpClient, IAuthSession authSession) :
 
     public Task<IReadOnlyList<RegistrationSummary>> GetWaitlistAsync(string eventId, CancellationToken cancellationToken = default) =>
         GetListAsync<RegistrationSummary>($"events/{Uri.EscapeDataString(eventId)}/waitlist", cancellationToken);
+
+    public Task<IReadOnlyList<NotificationLogSummary>> GetNotificationLogsAsync(CancellationToken cancellationToken = default) =>
+        GetListAsync<NotificationLogSummary>("notifications", cancellationToken);
 
     private async Task<IReadOnlyList<T>> GetListAsync<T>(string path, CancellationToken cancellationToken)
     {

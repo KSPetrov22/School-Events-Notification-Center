@@ -80,7 +80,7 @@ Reads user identity from `Authorization: Bearer` on all other requests.
 
 - .NET 10 · ASP.NET Core (controllers) · .NET Worker Service
 - EF Core + Npgsql (PostgreSQL) · EFCore.NamingConventions (snake_case columns)
-- JWT Bearer auth · BCrypt password hashing · MailKit (SMTP) · DotNetEnv
+- JWT Bearer auth · BCrypt password hashing · DotNetEnv
 
 **Frontend (PresentationLayer1)**
 - ASP.NET Core Razor Pages · session-based auth · typed HttpClient (`ApiClient`)
@@ -105,11 +105,45 @@ dotnet run --project PresentationLayer1   # → http://localhost:5080
 
 Open **http://localhost:5080**. The login page shows a dropdown of seeded accounts — no password needed.
 
+### Docker mock stack
+
+```bash
+docker compose up --build
+```
+
+Open **http://localhost:5080**. Compose starts:
+
+- `presentation` on `http://localhost:5080`
+- `mockserver` on `http://localhost:5090`
+
+The mock API stores its SQLite database in the `mockserver-data` Docker volume.
+Use `docker compose down -v` when you want to reset the seeded mock data.
+
+### Docker real backend stack
+
+```bash
+docker compose -f compose.real.yaml up --build
+```
+
+Open **http://localhost:5080**. This uses the real `/api` controllers backed by
+EF Core + SQLite instead of `MockServer`. Seeded login credentials:
+
+- `student1@school.local` / `password`
+- `student2@school.local` / `password`
+- `organizer1@school.local` / `password`
+
+The real backend stores SQLite data in the `presentation-data` Docker volume.
+Use this to reset it:
+
+```bash
+docker compose -f compose.real.yaml down -v
+```
+
 ### Real backend — frontend with actual login screen (requires layers to be implemented)
 
 ```bash
 cp .env.dev.example .env
-# Edit .env as needed (DATABASE_URL, SMTP_*, JWT_SECRET already have dev defaults)
+# Edit .env as needed (DATABASE_URL and JWT_* already have dev defaults)
 
 dotnet run --project DataAccessLayer3/Db/InitDb/InitDb.csproj   # create DB from schema.sql
 

@@ -1,10 +1,14 @@
 using BusinessLogicLayer2;
+using BusinessLogicLayer2.Services;
 using DotNetEnv;
 using Worker;
 
 // Load .env from CWD; fall back one level up for `dotnet run --project` invocations
 var envPath = File.Exists(".env") ? ".env" : Path.Combine("..", ".env");
-Env.Load(envPath);
+if (File.Exists(envPath))
+{
+    Env.Load(envPath);
+}
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -15,4 +19,11 @@ var databaseUrl = builder.Configuration["DATABASE_URL"]
 builder.Services.AddBusinessLayer(databaseUrl);
 builder.Services.AddHostedService<NotificationWorker>();
 
-builder.Build().Run();
+var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    await scope.ServiceProvider.GetRequiredService<IApplicationInitializer>().EnsureReadyAsync();
+}
+
+app.Run();

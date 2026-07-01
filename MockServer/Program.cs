@@ -4,7 +4,10 @@ using Microsoft.Data.Sqlite;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.WebHost.UseUrls("http://localhost:5090");
+var urls = builder.Configuration["ASPNETCORE_URLS"]
+    ?? builder.Configuration["urls"]
+    ?? "http://localhost:5090";
+builder.WebHost.UseUrls(urls);
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
@@ -157,7 +160,9 @@ sealed class MockDatabase
         var count = Scalar<long>(connection, "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = 'users'");
         if (count == 0)
         {
-            var schemaPath = Path.GetFullPath(Path.Combine(contentRoot, "..", "DataAccessLayer3", "Db", "schema.sql"));
+            var publishedSchemaPath = Path.Combine(contentRoot, "Db", "schema.sql");
+            var sourceTreeSchemaPath = Path.GetFullPath(Path.Combine(contentRoot, "..", "DataAccessLayer3", "Db", "schema.sql"));
+            var schemaPath = File.Exists(publishedSchemaPath) ? publishedSchemaPath : sourceTreeSchemaPath;
             using var schema = connection.CreateCommand();
             schema.CommandText = File.ReadAllText(schemaPath);
             schema.ExecuteNonQuery();

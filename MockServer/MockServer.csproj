@@ -11,5 +11,11 @@
     <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.0" />
   </ItemGroup>
 
-</Project>
+  <ItemGroup>
+    <Content Include="..\DataAccessLayer3\Db\schema.sql" Link="Db\schema.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
 
+</Project>

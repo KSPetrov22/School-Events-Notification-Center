@@ -5,7 +5,7 @@ using PresentationLayer1.Services;
 
 namespace PresentationLayer1.Pages.Organizer.Events;
 
-public sealed class EditModel(IApiClient api) : PageModel
+public sealed class EditModel(IApiClient api, IAuthSession auth) : PageModel
 {
     [BindProperty(SupportsGet = true)]
     public string? Id { get; set; }
@@ -20,6 +20,12 @@ public sealed class EditModel(IApiClient api) : PageModel
 
     public async Task<IActionResult> OnGetAsync(CancellationToken cancellationToken)
     {
+        if (!auth.IsOrganizer)
+        {
+            TempData["Error"] = "Sign in as an organizer to edit events.";
+            return RedirectToPage("/Login");
+        }
+
         if (Id is null)
         {
             return Page();
@@ -47,6 +53,12 @@ public sealed class EditModel(IApiClient api) : PageModel
 
     public async Task<IActionResult> OnPostAsync(CancellationToken cancellationToken)
     {
+        if (!auth.IsOrganizer)
+        {
+            TempData["Error"] = "Sign in as an organizer to save events.";
+            return RedirectToPage("/Login");
+        }
+
         if (!ModelState.IsValid)
         {
             return Page();
