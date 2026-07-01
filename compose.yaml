@@ -1,0 +1,36 @@
+services:
+  mockserver:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PROJECT: MockServer/MockServer.csproj
+        APP_DLL: MockServer.dll
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:5090
+    ports:
+      - "5090:5090"
+    volumes:
+      - mockserver-data:/app/App_Data
+
+  presentation:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PROJECT: PresentationLayer1/PresentationLayer1.csproj
+        APP_DLL: PresentationLayer1.dll
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:5080
+      DATABASE_URL: Data Source=/app/App_Data/school_events.db
+      MOCK_LOGIN: "true"
+      MockApiBaseUrl: http://mockserver:5090
+    ports:
+      - "5080:5080"
+    depends_on:
+      - mockserver
+
+volumes:
+  mockserver-data:

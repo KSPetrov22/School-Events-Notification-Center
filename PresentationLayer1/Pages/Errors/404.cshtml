@@ -1,0 +1,15 @@
+@page
+@model PresentationLayer1.Pages.Errors.NotFoundModel
+@{
+    ViewData["Title"] = "Page not found";
+}
+
+<section class="panel empty-state">
+  <span class="badge">404</span>
+  <h1>Page not found</h1>
+  <p class="muted">The page may have been moved, deleted, or the address may be mistyped.</p>
+  <div class="actions">
+    <a class="button" asp-page="/Events/Index">Browse events</a>
+    <a class="button secondary" asp-page="/Login">Login</a>
+  </div>
+</section>

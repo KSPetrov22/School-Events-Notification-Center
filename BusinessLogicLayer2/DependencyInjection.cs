@@ -1,4 +1,5 @@
 using DataAccessLayer3;
+using BusinessLogicLayer2.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BusinessLogicLayer2;
@@ -11,7 +12,10 @@ public static class DependencyInjection
         this IServiceCollection services, string databaseUrl)
     {
         services.AddDataLayer(databaseUrl);
-        // TODO: register services (IEventService, INotificationService, ...) here.
+        services.AddScoped<IApplicationInitializer, ApplicationInitializer>();
+        services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IEventService, EventService>();
+        services.AddScoped<INotificationService, NotificationService>();
         return services;
     }
 }

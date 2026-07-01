@@ -13,8 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />   <!-- password hashing (Task 1.2) -->
-    <PackageReference Include="MailKit" Version="4.8.0" />            <!-- SMTP send (Task 4.5) -->
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.0" />
   </ItemGroup>
 

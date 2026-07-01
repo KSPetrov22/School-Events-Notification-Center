@@ -1,0 +1,38 @@
+@page
+@model PresentationLayer1.Pages.Organizer.NotificationsModel
+@{
+    ViewData["Title"] = "Notifications";
+}
+
+<section class="page-heading">
+  <div>
+    <h1>Notifications</h1>
+    <p class="muted">Local delivery log from the background worker.</p>
+  </div>
+</section>
+
+<section class="panel">
+  <table>
+    <thead>
+      <tr>
+        <th>Time</th>
+        <th>Type</th>
+        <th>Recipient</th>
+        <th>Status</th>
+        <th>Subject</th>
+      </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model.Logs)
+    {
+      <tr>
+        <td><time class="local-time" datetime="@item.SentAt">@item.SentAt</time></td>
+        <td>@item.Type</td>
+        <td>@item.RecipientEmail</td>
+        <td><span class="badge @(item.Success ? "published" : "cancelled")">@(item.Success ? "SENT" : "FAILED")</span></td>
+        <td>@(item.Subject ?? item.ErrorMessage ?? "-")</td>
+      </tr>
+    }
+    </tbody>
+  </table>
+</section>

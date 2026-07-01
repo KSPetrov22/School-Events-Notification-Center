@@ -34,6 +34,16 @@ public sealed record RegistrationSummary(
     string RegisteredAt,
     int? WaitlistPosition);
 
+public sealed record NotificationLogSummary(
+    string Id,
+    string? JobId,
+    string RecipientEmail,
+    string Type,
+    string? Subject,
+    bool Success,
+    string? ErrorMessage,
+    string SentAt);
+
 public sealed class EventUpsertRequest
 {
     [Required]
